@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>⛽ Filling CNG Form</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f2f6fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    form {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 25px;
+    }
+
+    label {
+      font-weight: 500;
+      color: #444;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="file"],
+    input[type="number"]
+     {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      margin-bottom: 20px;
+      transition: 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="file"]:focus,
+    input[type="number"]:focus  {
+      border-color: #8a2be2;
+      box-shadow: 0 0 5px rgba(138, 43, 226, 0.3);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #8a2be2;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #6f1fd1;
+      transform: scale(1.02);
+    }
+        /* Popup Styling */
+    .popup {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #4BB543;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      display: none;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+    <div class="popup" id="successPopup">✔️ Data submitted successfully!</div>
+  <form action="/Filling-cng" method="POST" enctype="multipart/form-data" autocomplete="off">
+    <h2>CNG Details</h2>
+
+    <label>CNG quantity(kg):</label>
+    <input type="text" name="cngQty" required>
+
+    <label>CNG Amount (₹):</label>
+    <input type="number" name="amount" required>
+
+    <label>Odometer Reading:</label>
+    <input type="text" name="reading" required>
+
+    <label>Odometer Photo:</label>
+    <input type="file" name="photo" required>
+
+    <button type="submit">Submit</button>
+  </form>
+ <script>
+  window.onload = function () {
+    const form = document.querySelector('form');
+    form.reset();
+  };
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isSuccess = urlParams.get('success');
+
+  if (isSuccess) {
+    const popup = document.getElementById('successPopup');
+    popup.style.display = 'block';
+
+    setTimeout(() => {
+      popup.style.display = 'none';
+      window.history.replaceState(null, null, window.location.pathname);
+    }, 3000);
+  }
+</script>
+</body>
+</html>

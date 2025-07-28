@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ODO Meter Form</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    form {
+      background-color: #fff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+      font-size: 24px;
+    }
+
+    label {
+      font-size: 16px;
+      color: #555;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"]:hover,
+    input[type="file"]:hover {
+      border-color: #8e44ad;
+      background-color: #f9f1ff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #8e44ad;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #732d91;
+    }
+
+    /* Popup Styling */
+    .popup {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #4BB543;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      display: none;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Success Popup -->
+  <div class="popup" id="successPopup">✔️ Data submitted successfully!</div>
+
+  <form id="odoForm" action="/Before-start" method="POST" enctype="multipart/form-data" autocomplete="off">
+    <h2>Submit ODO Meter Reading</h2>
+
+    <label for="reading">ODO Meter Reading:</label>
+    <input type="text" name="reading" id="reading" required>
+
+    <label for="photo">Upload ODO Photo:</label>
+    <input type="file" name="photo" id="photo" accept="image/*" required>
+
+    <button type="submit">Submit</button>
+  </form>
+<script>
+  window.onload = function () {
+    const form = document.querySelector('form');
+    form.reset();
+  };
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isSuccess = urlParams.get('success');
+
+  if (isSuccess) {
+    const popup = document.getElementById('successPopup');
+    popup.style.display = 'block';
+
+    setTimeout(() => {
+      popup.style.display = 'none';
+      window.history.replaceState(null, null, window.location.pathname);
+    }, 3000);
+  }
+</script>
+</body>
+</html>

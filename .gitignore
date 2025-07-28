@@ -1,0 +1,4 @@
+node_modules/
+uploads/
+googlesheet_cred.json
+.env
