@@ -31,8 +31,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('views'));
-app.use('/uploads', express.static('uploads'));
-
+app.use('/uploads', express.static('uploads')); 
 app.use(session({
   secret: 'bfieubfefi1',
   resave: false,
@@ -42,6 +41,10 @@ app.use(session({
 // Routes
 app.get('/', (req, res) => res.render('login', { error: null }));
 
+function noCache(req, res, next) {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  next();
+}
 
 
 app.post('/logout', (req, res) => {
@@ -53,41 +56,42 @@ app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   const token = 'sec@12jfl..idwh23';
 
-  // Admin URL
   const adminUrl = `https://script.google.com/macros/s/AKfycbwvRTpJoTt0RDvpECOPz1-eFxbMXP_bKfrbB2aT-eMXhIb9aomuTY7aTjcrRu42bjiW/exec?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&token=${token}`;
-  
-  // Driver URL
+
   const driverUrl = `https://script.google.com/macros/s/AKfycbzqgu8vCz0VnA8DV3tqwT7IRjh9PT39IKTWR3JxIS8rVyeN0utmnnxHX6yUCUvCSKkg/exec?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&token=${token}`;
 
   try {
-    // 1️⃣ Check Admin Login First
+    // ⏱️ Try admin first
     const adminRes = await fetch(adminUrl);
-    const adminData = await adminRes.json();
-
-    if (adminData.success) {
-      req.session.isAdminLoggedIn = true;
-      req.session.username = username;
-      return res.render('Admin_Dashboard', { username });
-    }
-
-    // 2️⃣ Check Driver Login
-    const driverRes = await fetch(driverUrl);
-    const driverData = await driverRes.json();
-
-    if (driverData.success) {
-      req.session.username = username;
-      req.session.vehicleNumber = driverData.vehicle_number || 'Unknown';
-      req.session.profilePhoto = driverData.profile_photo || null;
-      req.session.leased = driverData.is_lease === 'Yes';
-
-      if (req.session.leased) {
-        return res.redirect('/leased-profile');
-      } else {
-        return res.redirect('/not-leased-profile');
+    if (adminRes.ok) {
+      const adminData = await adminRes.json();
+      if (adminData.success) {
+        req.session.isAdminLoggedIn = true;
+        req.session.username = username;
+        res.set('Cache-Control', 'no-store');
+        return res.render('Admin_Dashboard', { username });
       }
     }
 
-    // ❌ Invalid for both
+    // ⏱️ If not admin, try driver
+    const driverRes = await fetch(driverUrl);
+    if (driverRes.ok) {
+      const driverData = await driverRes.json();
+      if (driverData.success) {
+        req.session.username = username;
+        req.session.vehicleNumber = driverData.vehicle_number || 'Unknown';
+        req.session.profilePhoto = driverData.profile_photo || null;
+        req.session.leased = driverData.is_lease === 'Yes';
+
+        if (req.session.leased) {
+          return res.redirect('/leased-profile');
+        } else {
+          return res.redirect('/not-leased-profile');
+        }
+      }
+    }
+
+    // ❌ If both fail
     res.render('login', { error: '❌ Invalid username or password' });
 
   } catch (error) {
@@ -99,6 +103,7 @@ app.post('/login', async (req, res) => {
 
 app.get('/leased-profile', (req, res) => {
   if (!req.session.username || !req.session.leased) return res.redirect('/');
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.render('Lease_Driver_Profile', {
     username: req.session.username,
     vehicleNumber: req.session.vehicleNumber,
@@ -107,30 +112,30 @@ app.get('/leased-profile', (req, res) => {
   });
 });
 
+
 app.get('/not-leased-profile', (req, res) => {
   if (!req.session.username || req.session.leased) return res.redirect('/');
   res.render('Driver_Profile', {
     username: req.session.username,
     vehicleNumber: req.session.vehicleNumber,
-     isLeased: req.session.leased,
+    isLeased: req.session.leased,
     profilePhoto: req.session.profilePhoto
   });
 });
 
-app.get('/trip-form/before', (req, res) => {
+app.get('/trip-form/before', noCache, (req, res) => {
   if (!req.session.username) return res.redirect('/');
   res.render('Before_start');
 });
-
-app.get('/trip-form/cng', (req, res) => {
+app.get('/trip-form/cng', noCache, (req, res) => {
   if (!req.session.username) return res.redirect('/');
   res.render('Filling_cng');
 });
-
-app.get('/trip-form/after', (req, res) => {
+app.get('/trip-form/after', noCache, (req, res) => {
   if (!req.session.username) return res.redirect('/');
   res.render('After_end');
 });
+
 
 app.get('/trip-form', (req, res) => {
   if (!req.session.username || !req.session.leased) return res.redirect('/');
@@ -221,7 +226,7 @@ const photoLink = `${baseURL}/uploads/${fileName}`;
   });
 
   await addToSheet(reading, photoLink, username, vehicleNumber, date);
-  res.redirect('/Before-start?success=true');
+  res.render('submit_page')
 });
 app.get('/Filling-cng', (req, res) => {
   res.render('Filling_cng'); // or res.render(...) if using EJS
@@ -246,7 +251,7 @@ const photoLink = `${baseURL}/uploads/${fileName}`;
   });
 
   await addToSheet1(cngQty, photoLink, username, vehicleNumber, date,reading,amount);
-  res.redirect('/Filling-cng?success=true');
+res.render('submit_page')
 });
 
 app.get('/After-end', (req, res) => {
@@ -270,7 +275,7 @@ const photoLink = `${baseURL}/uploads/${fileName}`;
   });
 
   await addToSheet2(reading, photoLink, username, vehicleNumber, date);
-   res.redirect('/After-end?success=true');
+  res.render('submit_page')
 });
 app.get('/leased-drivers', async (req, res) => {
   try {
@@ -296,6 +301,7 @@ app.get('/leased-drivers', async (req, res) => {
       }));
 
     console.log('✅ Leased Drivers:', leasedDrivers);
+    console.log(photo)
     res.render('leased_drivers_list', { leasedDrivers });
 
   } catch (error) {
@@ -338,7 +344,7 @@ app.get('/non-leased-drivers', async (req, res) => {
 
 
 
-app.get('/admin-view-lease-driver-profile', async (req, res) => {
+app.get('/admin-view-lease-driver-profile',noCache, async (req, res) => {
   const username = req.query.username;
   console.log(username);
   const token ='sec@12jfl..idwh23';
