@@ -301,7 +301,7 @@ app.get('/leased-drivers', async (req, res) => {
       }));
 
     console.log('✅ Leased Drivers:', leasedDrivers);
-    console.log(photo)
+   
     res.render('leased_drivers_list', { leasedDrivers });
 
   } catch (error) {
