@@ -1,109 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Leased Drivers List</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      padding: 40px;
-      background: #f4f4f4;
-    }
-
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-      font-size: 32px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 30px;
-      background-color: #fff;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    th, td {
-      padding: 14px 18px;
-      border-bottom: 1px solid #eee;
-      text-align: left;
-      font-size: 16px;
-      color: #444;
-    }
-
-    th {
-      background-color: #f0f0f0;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: #555;
-    }
-
-    img {
-      height: 60px;
-      width: 60px;
-      object-fit: cover;
-      border-radius: 50%;
-      border: 2px solid #ccc;
-    }
-
-    .btn {
-      background-color: #3498db;
-      color: white;
-      padding: 8px 14px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.3s ease;
-    }
-
-    .btn:hover {
-      background-color: #2980b9;
-    }
-
-    form {
-      margin: 0;
-    }
-  </style>
-</head>
-<body>
-
-  <h1>Lease Drivers</h1>
-
-  <table>
-    <thead>
+<!-- Lease Driver List -->
+<div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif;">
+  <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Lease Cars</h2>
+  
+  <table style="width: 100%; border-collapse: collapse; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+    <thead style="background-color: #f8b500; color: white;">
       <tr>
-        <th>Profile Photo</th>
-        <th>Username</th>
-        <th>Vehicle Number</th>
-        <th>Profile</th>
+        <th style="padding: 12px;">Profile Photo</th>
+        <th style="padding: 12px;">Username</th>
+        <th style="padding: 12px;">Vehicle Number</th>
+        <th style="padding: 12px;">Profile</th>
       </tr>
     </thead>
     <tbody>
       <% leasedDrivers.forEach(driver => { %>
-        <tr>
-          <td>
+        <tr style="text-align: center; background-color: #fff; border-bottom: 1px solid #ddd;">
+          <td style="padding: 12px;">
             <% if (driver.photo) { %>
-              <img src="<%= driver.photo %>" alt="Photo">
+              <img src="<%= driver.photo %>" alt="Photo" style="height: 60px; width: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #f8b500;">
             <% } else { %>
-              No Photo
+              <span style="color: gray;">No Photo</span>
             <% } %>
           </td>
-          <td><%= driver.username %></td>
-          <td><%= driver.vehicle %></td>
-          <td>
+          <td style="padding: 12px;"><%= driver.username %></td>
+          <td style="padding: 12px;"><%= driver.vehicle %></td>
+          <td style="padding: 12px;">
             <form action="/admin-view-lease-driver-profile" method="GET">
               <input type="hidden" name="username" value="<%= driver.username %>">
-              <button type="submit" class="btn">Go to Profile</button>
+              <button type="submit" style="padding: 8px 16px; background-color: #f8b500; border: none; color: white; border-radius: 8px; font-weight: 500; cursor: pointer; transition: background-color 0.3s ease; font-family: 'Poppins', sans-serif;" onmouseover="this.style.backgroundColor='#d99400'" onmouseout="this.style.backgroundColor='#f8b500'">
+                View Profile
+              </button>
             </form>
           </td>
         </tr>
       <% }) %>
     </tbody>
   </table>
-
-</body>
-</html>
+</div>

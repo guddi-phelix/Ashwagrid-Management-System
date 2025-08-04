@@ -6,34 +6,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Poppins', sans-serif;
       background: linear-gradient(to right, #fceabb, #f8b500);
       display: flex;
       height: 100vh;
+      overflow: hidden;
     }
 
-    /* Sidebar */
     .sidebar {
       width: 250px;
       background-color: #fff5e6;
       padding: 40px 20px;
-      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
-      justify-content: start;
       gap: 20px;
     }
 
     .sidebar h2 {
       color: #333;
-      margin-bottom: 40px;
       font-size: 22px;
       text-align: center;
     }
@@ -48,31 +41,21 @@
       font-weight: bold;
       text-decoration: none;
       transition: 0.3s ease;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .lease-btn {
-      background-color: #007bff;
-    }
+    .lease-btn { background-color: #007bff; }
+    .nonlease-btn { background-color: #28a745; }
+    .admin-btn:hover { transform: scale(1.05); opacity: 0.9; }
 
-    .nonlease-btn {
-      background-color: #28a745;
-    }
-
-    .admin-btn:hover {
-      transform: scale(1.05);
-      opacity: 0.9;
-    }
-
-    /* Main content */
     .main-content {
       flex: 1;
       padding: 40px;
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
     }
 
     .top-bar {
@@ -89,7 +72,6 @@
       background-color: #fff;
       padding: 10px 20px;
       border-radius: 30px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .admin-info i {
@@ -107,13 +89,12 @@
       background-color: #dc3545;
       color: white;
       border: none;
-     font-family: 'Poppins', sans-serif;
+      font-family: 'Poppins', sans-serif;
       border-radius: 20px;
       padding: 6px 14px;
       font-size: 18px;
       margin-left: 10px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
     }
 
     .logout-btn:hover {
@@ -123,24 +104,26 @@
     .main-content h1 {
       font-size: 36px;
       color: #333;
+      margin-bottom: 20px;
     }
 
-    .main-content p {
-      font-size: 18px;
-      color: #555;
+    #driverDataContainer {
+      margin-top:5px;
     }
+
+
   </style>
 </head>
 <body>
 
   <div class="sidebar">
     <h2>Driver Records</h2>
-    <a href="/leased-drivers" class="admin-btn lease-btn">
-      <i class="fas fa-car-side"></i> Lease Drivers
-    </a>
-    <a href="/non-leased-drivers" class="admin-btn nonlease-btn">
-      <i class="fas fa-car"></i> Non-Lease Drivers
-    </a>
+    <button class="admin-btn lease-btn" onclick="loadDrivers('lease')">
+      <i class="fas fa-car-side"></i> Lease Cars
+    </button>
+    <button class="admin-btn nonlease-btn" onclick="loadDrivers('nonlease')">
+      <i class="fas fa-car"></i> Non-Lease Cars
+    </button>
   </div>
 
   <div class="main-content">
@@ -154,7 +137,28 @@
         </form>
       </div>
     </div>
+
+    <!-- Driver data will appear here -->
+    <div id="driverDataContainer">
+      
+    </div>
   </div>
+
+  <script>
+    function loadDrivers(type) {
+      const url = type === 'lease' ? '/leased-drivers' : '/non-leased-drivers';
+
+      fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('driverDataContainer').innerHTML = html;
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('driverDataContainer').innerHTML = "<p style='color:red;'>Failed to load data.</p>";
+        });
+    }
+  </script>
 
 </body>
 </html>

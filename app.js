@@ -16,13 +16,11 @@ const creds = JSON.parse(process.env.GOOGLE_SHEET_CREDENTIALS);
 
 
 
-
 const { JWT } = require('google-auth-library');
 const { error } = require('console');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 
 
 
@@ -35,23 +33,25 @@ app.use('/uploads', express.static('uploads'));
 app.use(session({
   secret: 'bfieubfefi1',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+   cookie: {
+    maxAge: 3600000 // ← this controls session duration in milliseconds
+  }
 }));
 
+
 // Routes
-app.get('/', (req, res) => res.render('login', { error: null }));
-
-function noCache(req, res, next) {
-  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  next();
-}
-
-
+app.get('/', (req, res) => {
+res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+res.render('login', { error: null });
+});
 app.post('/logout', (req, res) => {
   req.session.destroy(() => {
-    res.redirect('/'); // adjust as needed
+    res.redirect('/');
   });
 });
+
+
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   const token = 'sec@12jfl..idwh23';
@@ -61,27 +61,33 @@ app.post('/login', async (req, res) => {
   const driverUrl = `https://script.google.com/macros/s/AKfycbzqgu8vCz0VnA8DV3tqwT7IRjh9PT39IKTWR3JxIS8rVyeN0utmnnxHX6yUCUvCSKkg/exec?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&token=${token}`;
 
   try {
-    // ⏱️ Try admin first
-    const adminRes = await fetch(adminUrl);
-    if (adminRes.ok) {
-      const adminData = await adminRes.json();
+    const [adminResult, driverResult] = await Promise.allSettled([
+      fetch(adminUrl),
+      fetch(driverUrl)
+    ]);
+
+    // ✅ First try admin result
+    if (adminResult.status === 'fulfilled' && adminResult.value.ok) {
+      const adminData = await adminResult.value.json();
       if (adminData.success) {
         req.session.isAdminLoggedIn = true;
         req.session.username = username;
-        res.set('Cache-Control', 'no-store');
+        
+
         return res.render('Admin_Dashboard', { username });
       }
     }
 
-    // ⏱️ If not admin, try driver
-    const driverRes = await fetch(driverUrl);
-    if (driverRes.ok) {
-      const driverData = await driverRes.json();
+    // ✅ Then try driver result
+    if (driverResult.status === 'fulfilled' && driverResult.value.ok) {
+      const driverData = await driverResult.value.json();
       if (driverData.success) {
         req.session.username = username;
         req.session.vehicleNumber = driverData.vehicle_number || 'Unknown';
         req.session.profilePhoto = driverData.profile_photo || null;
         req.session.leased = driverData.is_lease === 'Yes';
+        req.session.reauthenticated = true;
+
 
         if (req.session.leased) {
           return res.redirect('/leased-profile');
@@ -91,7 +97,7 @@ app.post('/login', async (req, res) => {
       }
     }
 
-    // ❌ If both fail
+    // ❌ Both failed
     res.render('login', { error: '❌ Invalid username or password' });
 
   } catch (error) {
@@ -100,10 +106,8 @@ app.post('/login', async (req, res) => {
   }
 });
 
-
-app.get('/leased-profile', (req, res) => {
-  if (!req.session.username || !req.session.leased) return res.redirect('/');
-  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+app.get('/leased-profile',(req, res) => {
+    if (!req.session.username || !req.session.leased) return res.redirect('/');
   res.render('Lease_Driver_Profile', {
     username: req.session.username,
     vehicleNumber: req.session.vehicleNumber,
@@ -113,7 +117,7 @@ app.get('/leased-profile', (req, res) => {
 });
 
 
-app.get('/not-leased-profile', (req, res) => {
+app.get('/not-leased-profile',(req, res) => {
   if (!req.session.username || req.session.leased) return res.redirect('/');
   res.render('Driver_Profile', {
     username: req.session.username,
@@ -123,15 +127,15 @@ app.get('/not-leased-profile', (req, res) => {
   });
 });
 
-app.get('/trip-form/before', noCache, (req, res) => {
+app.get('/trip-form/before',(req, res) => {
   if (!req.session.username) return res.redirect('/');
   res.render('Before_start');
 });
-app.get('/trip-form/cng', noCache, (req, res) => {
+app.get('/trip-form/cng',(req, res) => {
   if (!req.session.username) return res.redirect('/');
   res.render('Filling_cng');
 });
-app.get('/trip-form/after', noCache, (req, res) => {
+app.get('/trip-form/after',(req, res) => {
   if (!req.session.username) return res.redirect('/');
   res.render('After_end');
 });
@@ -277,19 +281,14 @@ const photoLink = `${baseURL}/uploads/${fileName}`;
   await addToSheet2(reading, photoLink, username, vehicleNumber, date);
   res.render('submit_page')
 });
+// Lease Drivers Route
 app.get('/leased-drivers', async (req, res) => {
   try {
     await doc3.loadInfo();
     const sheet = doc3.sheetsByIndex[0];
     await sheet.loadHeaderRow(1);
 
-    console.log('📌 Headers:', sheet.headerValues);
-
     const rows = await sheet.getRows();
-
-    rows.forEach((row, i) => {
-      console.log(`Row ${i + 1} raw:`, row._rawData);
-    });
 
     const leasedDrivers = rows
       .filter(row => row._rawData[3]?.toLowerCase().trim() === 'yes')
@@ -300,28 +299,22 @@ app.get('/leased-drivers', async (req, res) => {
         photo: row._rawData[4]
       }));
 
-    console.log('✅ Leased Drivers:', leasedDrivers);
-   
-    res.render('leased_drivers_list', { leasedDrivers });
+    res.render('leased_drivers_list', { leasedDrivers, layout: false }); // 🔁 use short version + layout: false
 
   } catch (error) {
     console.error('❌ Error fetching leased drivers:', error);
     res.send('⚠️ Failed to load leased drivers.');
   }
 });
+
+// Non-Lease Drivers Route
 app.get('/non-leased-drivers', async (req, res) => {
   try {
     await doc3.loadInfo();
     const sheet = doc3.sheetsByIndex[0];
     await sheet.loadHeaderRow(1);
 
-    console.log('📌 Headers:', sheet.headerValues);
-
     const rows = await sheet.getRows();
-
-    rows.forEach((row, i) => {
-      console.log(`Row ${i + 1} raw:`, row._rawData);
-    });
 
     const nonLeasedDrivers = rows
       .filter(row => row._rawData[3]?.toLowerCase().trim() === 'no')
@@ -332,8 +325,7 @@ app.get('/non-leased-drivers', async (req, res) => {
         photo: row._rawData[4]
       }));
 
-    console.log('✅ Non-Leased Drivers:', nonLeasedDrivers);
-    res.render('non_leased_drivers_list', { nonLeasedDrivers });
+    res.render('non_leased_drivers_list', { nonLeasedDrivers, layout: false }); // 🔁 short version + layout: false
 
   } catch (error) {
     console.error('❌ Error fetching non-leased drivers:', error);
@@ -344,7 +336,7 @@ app.get('/non-leased-drivers', async (req, res) => {
 
 
 
-app.get('/admin-view-lease-driver-profile',noCache, async (req, res) => {
+app.get('/admin-view-lease-driver-profile',async (req, res) => {
   const username = req.query.username;
   console.log(username);
   const token ='sec@12jfl..idwh23';
