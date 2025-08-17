@@ -6,111 +6,146 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+ * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to right, #fceabb, #f8b500);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
+html, body {
+  height: 100%;
+  overflow: hidden; /* Prevent page scrolling */
+}
 
-    .sidebar {
-      width: 250px;
-      background-color: #fff5e6;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to right, #fceabb, #f8b500);
+  display: flex;
+}
 
-    .sidebar h2 {
-      color: #333;
-      font-size: 22px;
-      text-align: center;
-    }
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #fff5e6;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-    .admin-btn {
-      padding: 14px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      color: white;
-      font-weight: bold;
-      text-decoration: none;
-      transition: 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+.sidebar h2 {
+  color: #333;
+  font-size: 22px;
+  text-align: center;
+}
 
-    .lease-btn { background-color: #007bff; }
-    .nonlease-btn { background-color: #28a745; }
-    .admin-btn:hover { transform: scale(1.05); opacity: 0.9; }
+.admin-btn {
+  padding: 14px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  transition: 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-    .main-content {
-      flex: 1;
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
+.lease-btn { background-color: #007bff; }
+.nonlease-btn { background-color: #28a745; }
+.admin-btn:hover { transform: scale(1.05); opacity: 0.9; }
 
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 40px;
-    }
+/* Main content area */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; /* Stop main content scrolling */
+}
 
-    .admin-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      background-color: #fff;
-      padding: 10px 20px;
-      border-radius: 30px;
-    }
+/* Top bar fixed */
+.top-bar {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(5px);
+}
 
-    .admin-info i {
-      font-size: 24px;
-      color: #f8b500;
-    }
+.admin-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background-color: #fff;
+  padding: 10px 20px;
+  border-radius: 30px;
+}
 
-    .admin-name {
-      font-size: 18px;
-      font-weight: bold;
-      color: #444;
-    }
+.admin-info i {
+  font-size: 24px;
+  color: #f8b500;
+}
 
-    .logout-btn {
-      background-color: #dc3545;
-      color: white;
-      border: none;
-      font-family: 'Poppins', sans-serif;
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 18px;
-      margin-left: 10px;
-      cursor: pointer;
-    }
+.admin-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #444;
+}
 
-    .logout-btn:hover {
-      background-color: #c82333;
-    }
+.logout-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 18px;
+  margin-left: 10px;
+  cursor: pointer;
+}
 
-    .main-content h1 {
-      font-size: 36px;
-      color: #333;
-      margin-bottom: 20px;
-    }
+.logout-btn:hover {
+  background-color: #c82333;
+}
 
-    #driverDataContainer {
-      margin-top:5px;
-    }
+.main-content h1 {
+  font-size: 36px;
+  color: #333;
+}
 
+/* Table container fills remaining space */
+#driverDataContainer {
+  flex: 1;
+  padding: 10px 40px 20px 40px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#driverDataContainer .table-wrapper {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+}
+
+#driverDataContainer table {
+  border-collapse: collapse;
+  min-width: 1600px; /* Force horizontal scroll for many columns */
+}
+
+#driverDataContainer th,
+#driverDataContainer td {
+  padding: 10px;
+  text-align: left;
+  white-space: nowrap; /* Prevent column text wrapping */
+}
 
   </style>
 </head>
@@ -123,6 +158,21 @@
     </button>
     <button class="admin-btn nonlease-btn" onclick="loadDrivers('nonlease')">
       <i class="fas fa-car"></i> Non-Lease Cars
+    </button>
+    <button class="admin-btn lease-btn" onclick="loadDrivers('total_os')">
+      <i class="fas fa-car-side"></i> Total OS
+    </button>
+    <button class="admin-btn nonlease-btn" onclick="loadDrivers('daily_accounts')">
+      <i class="fas fa-car"></i> Daily Accounts
+    </button>
+    <button class="admin-btn lease-btn" onclick="loadDrivers('weekly_accounts')">
+      <i class="fas fa-car-side"></i> Weekly Accounts
+    </button>
+    <button class="admin-btn nonlease-btn" onclick="loadDrivers('driver_ids')">
+      <i class="fas fa-car"></i> Driver IDs
+    </button>
+    <button class="admin-btn lease-btn" onclick="loadDrivers('Car-history')">
+      <i class="fas fa-car-side"></i>Car History
     </button>
   </div>
 
@@ -143,22 +193,112 @@
       
     </div>
   </div>
+<script>
+function loadDrivers(type) {
+  let url;
 
-  <script>
-    function loadDrivers(type) {
-      const url = type === 'lease' ? '/leased-drivers' : '/non-leased-drivers';
+  switch(type) {
+    case 'lease': url = '/leased-drivers'; break;
+    case 'nonlease': url = '/non-leased-drivers'; break;
+    case 'total_os': url = '/Total_os'; break;
+    case 'daily_accounts': url = '/Daily_accounts'; break;
+    case 'weekly_accounts': url = '/Weekly_Accounts'; break;
+    case 'driver_ids': url = '/Driver_ids'; break;
+    case 'Car-history': url = '/Car_History'; break;
+    default:
+      document.getElementById('driverDataContainer').innerHTML = "<p style='color:red;'>Invalid option.</p>";
+      return;
+  }
 
-      fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById('driverDataContainer').innerHTML = html;
-        })
-        .catch(err => {
-          console.error(err);
-          document.getElementById('driverDataContainer').innerHTML = "<p style='color:red;'>Failed to load data.</p>";
-        });
+  fetch(url)
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('driverDataContainer').innerHTML = html;
+
+      // If loading Total OS, activate search + sort
+      if (type === 'total_os') {
+        activateSearchAndSort();
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById('driverDataContainer').innerHTML = "<p style='color:red;'>Failed to load data.</p>";
+    });
+}
+
+function activateSearchAndSort() {
+  console.log("✅ Search + Sort script activated");
+
+  const searchInput = document.getElementById("searchInput");
+  const sortSelect = document.getElementById("sortSelect");
+  const tableBody = document.getElementById("tableBody");
+
+  if (!searchInput || !sortSelect || !tableBody) return;
+
+  let allRows = Array.from(tableBody.querySelectorAll("tr"));
+
+  function renderRows(rows) {
+    tableBody.innerHTML = "";
+    rows.forEach(row => tableBody.appendChild(row));
+  }
+
+ function applyFilters() {
+  let filter = searchInput.value.toLowerCase();
+  let sortType = sortSelect.value;
+
+  let filteredRows = allRows.filter(row => {
+    let rowText = row.textContent.toLowerCase();
+    row.querySelectorAll("td").forEach(td => td.innerHTML = td.textContent); // reset highlights
+    if (filter && rowText.includes(filter)) {
+      row.querySelectorAll("td").forEach(td => {
+        td.innerHTML = td.textContent.replace(
+          new RegExp(`(${filter})`, "gi"),
+          `<span style="background: yellow; font-weight: bold;">$1</span>`
+        );
+      });
     }
-  </script>
+    return rowText.includes(filter) || !filter;
+  });
+
+  // Sorting
+  filteredRows.sort((a, b) => {
+    let agdA = a.cells[3]?.innerText.trim();
+    let agdB = b.cells[3]?.innerText.trim();
+
+    let numA = agdA ? parseInt(agdA.split('_').pop()) : 0;
+    let numB = agdB ? parseInt(agdB.split('_').pop()) : 0;
+
+    let nameA = a.cells[2]?.innerText.trim().toLowerCase();
+    let nameB = b.cells[2]?.innerText.trim().toLowerCase();
+
+    if (sortType === "agdAsc") return numA - numB;
+    if (sortType === "agdDesc") return numB - numA;
+    if (sortType === "nameAsc") return nameA.localeCompare(nameB);
+    if (sortType === "nameDesc") return nameB.localeCompare(nameA);
+    return 0;
+  });
+
+  // Render filtered rows
+  tableBody.innerHTML = "";
+  if (filteredRows.length > 0) {
+    filteredRows.forEach(row => tableBody.appendChild(row));
+  } else {
+    let noMatchRow = document.createElement("tr");
+    let td = document.createElement("td");
+    td.colSpan = tableBody.closest("table").rows[0].cells.length;
+    td.style.textAlign = "center";
+    td.style.color = "black";
+    td.textContent = "No match found";
+    noMatchRow.appendChild(td);
+    tableBody.appendChild(noMatchRow);
+  }
+}
+
+
+  searchInput.addEventListener("keyup", applyFilters);
+  sortSelect.addEventListener("change", applyFilters);
+}
+</script>
 
 </body>
 </html>

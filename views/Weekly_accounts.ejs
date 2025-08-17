@@ -1,0 +1,45 @@
+<!-- Lease Driver List -->
+<div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif;">
+  <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Daily Accounts</h2>
+
+  <!-- Scrollable container -->
+  <div style="overflow-x: auto; width: 100%;">
+    <table style="min-width: 1600px; border-collapse: collapse; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+      <thead style="background-color: #f8b500; color: white;">
+        <tr>
+          <th style="padding: 12px;">Driver ID</th>
+          <th style="padding: 12px;">Assigned Car</th>
+          <th style="padding: 12px;">Week Start</th>
+          <th style="padding: 12px;">Week End</th>
+          <th style="padding: 12px;">CAsh Collection</th>
+          <th style="padding: 12px;">Login Hours</th>
+          <th style="padding: 12px;">Toll</th>
+          <th style="padding: 12px;">CNG (paid by driver)</th>
+          <th style="padding: 12px;">Driver Salary</th>
+          <th style="padding: 12px;">Adjustment</th>
+          <th style="padding: 12px;">Final Amount</th>
+          <th style="padding: 12px;">Status</th>
+      
+        </tr>
+      </thead>
+      <tbody>
+        <% Weekly_accounts.forEach(driver => { %>
+          <tr style="text-align: center; background-color: #fff; border-bottom: 1px solid #ddd;">
+            <td style="padding: 12px;"><%= driver.Driver_ID %></td>
+            <td style="padding: 12px;"><%= driver.Assigned_Car %></td>
+            <td style="padding: 12px;"><%= driver.Week_Start %></td>
+             <td style="padding: 12px;"><%= driver.Week_End %></td>
+                <td style="padding: 12px;"><%= driver.Cash_Collection %></td>
+            <td style="padding: 12px;"><%= driver.Login_hours %></td>
+            <td style="padding: 12px;"><%= driver.Toll %></td>
+            <td style="padding: 12px;"><%= driver.CNG %></td>
+            <td style="padding: 12px;"><%= driver.Driver_salary %></td>
+            <td style="padding: 12px;"><%= driver.Adjustment %></td>
+            <td style="padding: 12px;"><%= driver.Final_amt %></td>
+            <td style="padding: 12px;"><%= driver.Status %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>

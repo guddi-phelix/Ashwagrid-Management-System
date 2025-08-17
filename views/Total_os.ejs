@@ -1,0 +1,50 @@
+<!-- Only HTML here -->
+<div id="totalOsContainer" style="padding: 20px; font-family: 'Poppins', sans-serif;">
+  <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Total OS</h2>
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+    <div id="filters" style="display: flex; gap: 10px;">
+      <select id="sortSelect" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+        <option value="">Sort By</option>
+        <option value="agdAsc">AGD ID ↑</option>
+        <option value="agdDesc">AGD ID ↓</option>
+        <option value="nameAsc">Name A → Z</option>
+        <option value="nameDesc">Name Z → A</option>
+      </select>
+    </div>
+
+    <input 
+      type="text" 
+      id="searchInput" 
+      placeholder="Search..." 
+      style="padding: 10px; width: 100%; max-width: 300px; border: 1px solid #ccc; border-radius: 6px;"
+    >
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+    <thead style="background-color: #f8b500; color: white;">
+      <tr>
+        <th style="padding: 12px;">WhatsApp Number</th>
+        <th style="padding: 12px;">Uber Registered Number</th>
+        <th style="padding: 12px;">Name</th>
+        <th style="padding: 12px;">AGD ID</th>
+        <th style="padding: 12px;">Weekly OS</th>
+        <th style="padding: 12px;">Daily Hisaab</th>
+        <th style="padding: 12px;">Total OS</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <% totalos.forEach(driver => { %>
+        <tr>
+          <td><%= driver.WhatsApp_Number %></td>
+          <td><%= driver.Uber_Registered_Number %></td>
+          <td><%= driver.Name %></td>
+          <td><%= driver.AGD_ID %></td>
+          <td><%= driver.Weekly_OS %></td>
+          <td><%= driver.Daily_Hisaab %></td>
+          <td><%= driver.Total_OS %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>

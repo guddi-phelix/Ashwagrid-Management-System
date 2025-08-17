@@ -182,13 +182,15 @@ select, select option {
   <div class="profile-container">
     <div class="profile-header">
       <% if (profilePhoto) { %>
-        <img src="<%= profilePhoto %>" alt="Profile Photo" class="profile-pic">
+       <img src="<%= profilePhoto %>" alt="Profile Photo" class="profile-pic">
+
       <% } else { %>
         <img src="https://via.placeholder.com/180" alt="No Photo" class="profile-pic">
       <% } %>
 
       <div class="profile-info">
         <h2><%= username %></h2>
+        <h2><%= agdId %></h2>
         <div class="info"><span class="label">Vehicle Number:</span> <%= vehicleNumber %></div>
         <div class="info"><span class="label">Status:</span> Not Leased</div>
       </div>

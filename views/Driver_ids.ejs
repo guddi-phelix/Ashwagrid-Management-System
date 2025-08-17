@@ -1,0 +1,76 @@
+<!-- Lease Driver List -->
+<div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif;">
+  <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Driver IDs</h2>
+
+  <!-- Scrollable container with only vertical scroll -->
+  <div style="overflow-y: auto; max-height: 400px; width: 100%; border: 1px solid #ddd;">
+    <table style="width: 100%; border-collapse: collapse; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+      <thead>
+        <tr style="background-color: #f8b500; color: white; position: sticky; top: 0; z-index: 2;">
+          <th style="padding: 12px; background-color: #f8b500;">UUID</th>
+          <th style="padding: 12px; background-color: #f8b500;">AGD ID</th>
+          <th style="padding: 12px; background-color: #f8b500;">Recruited From</th>
+          <th style="padding: 12px; background-color: #f8b500;">AGD ID of referee</th>
+          <th style="padding: 12px; background-color: #f8b500;">Relation</th>
+          <th style="padding: 12px; background-color: #f8b500;">Contact Number</th>
+          <th style="padding: 12px; background-color: #f8b500;">Driver Name in Uber</th>
+          <th style="padding: 12px; background-color: #f8b500;">WhatsApp Number</th>
+          <th style="padding: 12px; background-color: #f8b500;">Uber Registered Mobile Number</th>
+          <th style="padding: 12px; background-color: #f8b500;">Alternate Contact Number</th>
+          <th style="padding: 12px; background-color: #f8b500;">Emergency Contact Number</th>
+          <th style="padding: 12px; background-color: #f8b500;">Name of Emergency Contact</th>
+          <th style="padding: 12px; background-color: #f8b500;">Relation with Emergency Contact</th>
+          <th style="padding: 12px; background-color: #f8b500;">Present Address</th>
+          <th style="padding: 12px; background-color: #f8b500;">Permanent Address</th>
+          <th style="padding: 12px; background-color: #f8b500;">Age of Driver</th>
+          <th style="padding: 12px; background-color: #f8b500;">Marital Status</th>
+          <th style="padding: 12px; background-color: #f8b500;">Selfie</th>
+          <th style="padding: 12px; background-color: #f8b500;">Aadhar Card Number</th>
+          <th style="padding: 12px; background-color: #f8b500;">Aadhar Card Front</th>
+          <th style="padding: 12px; background-color: #f8b500;">Aadhar Card Back</th>
+          <th style="padding: 12px; background-color: #f8b500;">Driving License Number</th>
+          <th style="padding: 12px; background-color: #f8b500;">Driving License Front</th>
+          <th style="padding: 12px; background-color: #f8b500;">Driving License Back</th>
+          <th style="padding: 12px; background-color: #f8b500;">Pan Card Number</th>
+          <th style="padding: 12px; background-color: #f8b500;">Pan Card</th>
+          <th style="padding: 12px; background-color: #f8b500;">House Rented or Owned</th>
+          <th style="padding: 12px; background-color: #f8b500;">Electricity Bill</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% Driver_ids.forEach(driver => { %>
+          <tr style="text-align: center; background-color: #fff; border-bottom: 1px solid #ddd;">
+            <td style="padding: 12px;"><%= driver.UUID %></td>
+            <td style="padding: 12px;"><%= driver.AGD_ID %></td>
+            <td style="padding: 12px;"><%= driver.Recruited_From %></td>
+            <td style="padding: 12px;"><%= driver.AGD_ID_of_referee %></td>
+            <td style="padding: 12px;"><%= driver.Relation %></td>
+            <td style="padding: 12px;"><%= driver.Contact_Number %></td>
+            <td style="padding: 12px;"><%= driver.Driver_Name_in_Uber %></td>
+            <td style="padding: 12px;"><%= driver.WhatsApp_Number %></td>
+            <td style="padding: 12px;"><%= driver.Uber_Registered_Mobile_Number %></td>
+            <td style="padding: 12px;"><%= driver.Alternate_Contact_Number %></td>
+            <td style="padding: 12px;"><%= driver.Emergency_Contact_Number %></td>
+            <td style="padding: 12px;"><%= driver.Name_of_Emergency_Contact %></td>
+            <td style="padding: 12px;"><%= driver.Relation_with_Emergency_Contact %></td>
+            <td style="padding: 12px;"><%= driver.Present_Address %></td>
+            <td style="padding: 12px;"><%= driver.Permanent_Address %></td>
+            <td style="padding: 12px;"><%= driver.Age_of_Driver %></td>
+            <td style="padding: 12px;"><%= driver.Marital_Status %></td>
+            <td style="padding: 12px;"><%= driver.Selfie %></td>
+            <td style="padding: 12px;"><%= driver.Aadhar_Card_Number %></td>
+            <td style="padding: 12px;"><%= driver.Aadhar_Card_Front %></td>
+            <td style="padding: 12px;"><%= driver.Aadhar_Card_Back %></td>
+            <td style="padding: 12px;"><%= driver.Driving_License_Number %></td>
+            <td style="padding: 12px;"><%= driver.Driving_License_Front %></td>
+            <td style="padding: 12px;"><%= driver.Driving_License_Back %></td>
+            <td style="padding: 12px;"><%= driver.Pan_Card_Number %></td>
+            <td style="padding: 12px;"><%= driver.Pan_Card %></td>
+            <td style="padding: 12px;"><%= driver.House_Rented_or_Owned %></td>
+            <td style="padding: 12px;"><%= driver.Electricity_Bill %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>

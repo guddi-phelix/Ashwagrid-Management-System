@@ -1,38 +1,79 @@
-<!-- Lease Driver List -->
-<div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif;">
+<style>
+  /* Scrollable container */
+  .lease-table-scroll {
+    width: 100%;
+    height: calc(100vh - 200px); /* Adjust depending on header/menu height */
+    overflow-y: auto;
+    overflow-x: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding-bottom: 20px; /* Space so last row isn't glued to bottom */
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px; /* Makes horizontal scroll possible if narrow screen */
+  }
+
+  thead {
+    background-color: #f8b500;
+    color: white;
+    position: sticky;
+    top: 0; /* Keeps column headings fixed */
+    z-index: 2;
+  }
+
+  th, td {
+    padding: 12px;
+    text-align: center;
+  }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden; /* Prevent page scroll */
+  }
+</style>
+
+<div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif; height: 100%;">
   <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Lease Cars</h2>
   
-  <table style="width: 100%; border-collapse: collapse; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
-    <thead style="background-color: #f8b500; color: white;">
-      <tr>
-        <th style="padding: 12px;">Profile Photo</th>
-        <th style="padding: 12px;">Username</th>
-        <th style="padding: 12px;">Vehicle Number</th>
-        <th style="padding: 12px;">Profile</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% leasedDrivers.forEach(driver => { %>
-        <tr style="text-align: center; background-color: #fff; border-bottom: 1px solid #ddd;">
-          <td style="padding: 12px;">
-            <% if (driver.photo) { %>
-              <img src="<%= driver.photo %>" alt="Photo" style="height: 60px; width: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #f8b500;">
-            <% } else { %>
-              <span style="color: gray;">No Photo</span>
-            <% } %>
-          </td>
-          <td style="padding: 12px;"><%= driver.username %></td>
-          <td style="padding: 12px;"><%= driver.vehicle %></td>
-          <td style="padding: 12px;">
-            <form action="/admin-view-lease-driver-profile" method="GET">
-              <input type="hidden" name="username" value="<%= driver.username %>">
-              <button type="submit" style="padding: 8px 16px; background-color: #f8b500; border: none; color: white; border-radius: 8px; font-weight: 500; cursor: pointer; transition: background-color 0.3s ease; font-family: 'Poppins', sans-serif;" onmouseover="this.style.backgroundColor='#d99400'" onmouseout="this.style.backgroundColor='#f8b500'">
-                View Profile
-              </button>
-            </form>
-          </td>
+  <div class="lease-table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Profile Photo</th>
+          <th>Username</th>
+          <th>Vehicle Number</th>
+          <th>Profile</th>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% leasedDrivers.forEach(driver => { %>
+          <tr style="background-color: #fff; border-bottom: 1px solid #ddd;">
+            <td>
+              <% if (driver.photo) { %>
+                <img src="<%= driver.photo %>" alt="Photo" style="height: 60px; width: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #f8b500;">
+              <% } else { %>
+                <span style="color: gray;">No Photo</span>
+              <% } %>
+            </td>
+            <td><%= driver.username %></td>
+            <td><%= driver.vehicle %></td>
+            <td>
+              <form action="/admin-view-lease-driver-profile" method="GET">
+                <input type="hidden" name="username" value="<%= driver.username %>">
+                <button type="submit" style="padding: 8px 16px; background-color: #f8b500; border: none; color: white; border-radius: 8px; font-weight: 500; cursor: pointer; transition: background-color 0.3s ease; font-family: 'Poppins', sans-serif;" 
+                  onmouseover="this.style.backgroundColor='#d99400'" 
+                  onmouseout="this.style.backgroundColor='#f8b500'">
+                  View Profile
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
 </div>
