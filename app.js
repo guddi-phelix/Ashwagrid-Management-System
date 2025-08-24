@@ -13,8 +13,9 @@ const creds = JSON.parse(process.env.GOOGLE_SHEET_CREDENTIALS);
 const { JWT } = require('google-auth-library');
 const { error } = require('console');
 const mongoose = require('mongoose');
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected'))
+const dbURI = process.env.MONGO_URI;
+  mongoose.connect(dbURI)
+  .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
 const app = express();
