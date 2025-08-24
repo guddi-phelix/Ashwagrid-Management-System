@@ -14,7 +14,7 @@
 
 html, body {
   height: 100%;
-  overflow: hidden; /* Prevent page scrolling */
+  overflow: hidden;
 }
 
 body {
@@ -37,34 +37,51 @@ body {
   color: #333;
   font-size: 22px;
   text-align: center;
+  margin-bottom: 20px;
 }
 
+/* Modern Button Style (from profile page look) */
 .admin-btn {
-  padding: 14px 20px;
-  font-size: 16px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  color: white;
-  font-weight: bold;
-  text-decoration: none;
-  transition: 0.3s ease;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
+  padding: 14px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  transition: all 0.3s ease-in-out;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  font-family: 'Poppins', sans-serif;
+  
 }
 
-.lease-btn { background-color: #007bff; }
-.nonlease-btn { background-color: #28a745; }
-.admin-btn:hover { transform: scale(1.05); opacity: 0.9; }
+.admin-btn i {
+  font-size: 18px;
+ 
+}
 
-/* Main content area */
+/* Button colors */
+.lease-btn { background: linear-gradient(135deg, #007bff, #0056b3); }
+.nonlease-btn { background: linear-gradient(135deg, #28a745, #1e7e34); }
+
+/* Hover effects */
+.admin-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+/* Main content */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden; /* Stop main content scrolling */
+  overflow: hidden;
 }
 
 /* Top bar fixed */
@@ -115,11 +132,11 @@ body {
 }
 
 .main-content h1 {
-  font-size: 36px;
+  font-size: 32px;
   color: #333;
 }
 
-/* Table container fills remaining space */
+/* Table container */
 #driverDataContainer {
   flex: 1;
   padding: 10px 40px 20px 40px;
@@ -137,16 +154,15 @@ body {
 
 #driverDataContainer table {
   border-collapse: collapse;
-  min-width: 1600px; /* Force horizontal scroll for many columns */
+  min-width: 1600px;
 }
 
 #driverDataContainer th,
 #driverDataContainer td {
   padding: 10px;
   text-align: left;
-  white-space: nowrap; /* Prevent column text wrapping */
+  white-space: nowrap;
 }
-
   </style>
 </head>
 <body>
@@ -160,19 +176,19 @@ body {
       <i class="fas fa-car"></i> Non-Lease Cars
     </button>
     <button class="admin-btn lease-btn" onclick="loadDrivers('total_os')">
-      <i class="fas fa-car-side"></i> Total OS
+      <i class="fas fa-database"></i> Total OS
     </button>
     <button class="admin-btn nonlease-btn" onclick="loadDrivers('daily_accounts')">
-      <i class="fas fa-car"></i> Daily Accounts
+      <i class="fas fa-calendar-day"></i> Daily Accounts
     </button>
     <button class="admin-btn lease-btn" onclick="loadDrivers('weekly_accounts')">
-      <i class="fas fa-car-side"></i> Weekly Accounts
+      <i class="fas fa-calendar-week"></i> Weekly Accounts
     </button>
     <button class="admin-btn nonlease-btn" onclick="loadDrivers('driver_ids')">
-      <i class="fas fa-car"></i> Driver IDs
+      <i class="fas fa-id-card"></i> Driver IDs
     </button>
     <button class="admin-btn lease-btn" onclick="loadDrivers('Car-history')">
-      <i class="fas fa-car-side"></i>Car History
+      <i class="fas fa-history"></i> Car History
     </button>
   </div>
 
@@ -189,10 +205,9 @@ body {
     </div>
 
     <!-- Driver data will appear here -->
-    <div id="driverDataContainer">
-      
-    </div>
+    <div id="driverDataContainer"></div>
   </div>
+
 <script>
 function loadDrivers(type) {
   let url;
@@ -214,8 +229,6 @@ function loadDrivers(type) {
     .then(res => res.text())
     .then(html => {
       document.getElementById('driverDataContainer').innerHTML = html;
-
-      // If loading Total OS, activate search + sort
       if (type === 'total_os') {
         activateSearchAndSort();
       }
@@ -225,7 +238,6 @@ function loadDrivers(type) {
       document.getElementById('driverDataContainer').innerHTML = "<p style='color:red;'>Failed to load data.</p>";
     });
 }
-
 function activateSearchAndSort() {
   console.log("✅ Search + Sort script activated");
 
@@ -242,62 +254,70 @@ function activateSearchAndSort() {
     rows.forEach(row => tableBody.appendChild(row));
   }
 
- function applyFilters() {
-  let filter = searchInput.value.toLowerCase();
-  let sortType = sortSelect.value;
+  function applyFilters() {
+    let filter = searchInput.value.toLowerCase();
+    let sortType = sortSelect.value;
 
-  let filteredRows = allRows.filter(row => {
-    let rowText = row.textContent.toLowerCase();
-    row.querySelectorAll("td").forEach(td => td.innerHTML = td.textContent); // reset highlights
-    if (filter && rowText.includes(filter)) {
+    let filteredRows = allRows.filter(row => {
+      let rowText = row.textContent.toLowerCase();
+
+      // Reset highlights first
       row.querySelectorAll("td").forEach(td => {
-        td.innerHTML = td.textContent.replace(
-          new RegExp(`(${filter})`, "gi"),
-          `<span style="background: yellow; font-weight: bold;">$1</span>`
-        );
+        td.innerHTML = td.textContent;
       });
+
+      // Highlight only the matched word(s)
+      if (filter && rowText.includes(filter)) {
+        row.querySelectorAll("td").forEach(td => {
+          let text = td.textContent;
+          td.innerHTML = text.replace(
+            new RegExp(`(${filter})`, "gi"),
+            `<span style="background: yellow; font-weight: bold;">$1</span>`
+          );
+        });
+      }
+
+      return rowText.includes(filter) || !filter;
+    });
+
+    // Sorting
+    filteredRows.sort((a, b) => {
+      let agdA = a.cells[3]?.innerText.trim();
+      let agdB = b.cells[3]?.innerText.trim();
+
+      let numA = agdA ? parseInt(agdA.split('_').pop()) : 0;
+      let numB = agdB ? parseInt(agdB.split('_').pop()) : 0;
+
+      let nameA = a.cells[2]?.innerText.trim().toLowerCase();
+      let nameB = b.cells[2]?.innerText.trim().toLowerCase();
+
+      if (sortType === "agdAsc") return numA - numB;
+      if (sortType === "agdDesc") return numB - numA;
+      if (sortType === "nameAsc") return nameA.localeCompare(nameB);
+      if (sortType === "nameDesc") return nameB.localeCompare(nameA);
+      return 0;
+    });
+
+    // Render filtered rows
+    tableBody.innerHTML = "";
+    if (filteredRows.length > 0) {
+      filteredRows.forEach(row => tableBody.appendChild(row));
+    } else {
+      let noMatchRow = document.createElement("tr");
+      let td = document.createElement("td");
+      td.colSpan = tableBody.closest("table").rows[0].cells.length;
+      td.style.textAlign = "center";
+      td.style.color = "black";
+      td.textContent = "No match found";
+      noMatchRow.appendChild(td);
+      tableBody.appendChild(noMatchRow);
     }
-    return rowText.includes(filter) || !filter;
-  });
-
-  // Sorting
-  filteredRows.sort((a, b) => {
-    let agdA = a.cells[3]?.innerText.trim();
-    let agdB = b.cells[3]?.innerText.trim();
-
-    let numA = agdA ? parseInt(agdA.split('_').pop()) : 0;
-    let numB = agdB ? parseInt(agdB.split('_').pop()) : 0;
-
-    let nameA = a.cells[2]?.innerText.trim().toLowerCase();
-    let nameB = b.cells[2]?.innerText.trim().toLowerCase();
-
-    if (sortType === "agdAsc") return numA - numB;
-    if (sortType === "agdDesc") return numB - numA;
-    if (sortType === "nameAsc") return nameA.localeCompare(nameB);
-    if (sortType === "nameDesc") return nameB.localeCompare(nameA);
-    return 0;
-  });
-
-  // Render filtered rows
-  tableBody.innerHTML = "";
-  if (filteredRows.length > 0) {
-    filteredRows.forEach(row => tableBody.appendChild(row));
-  } else {
-    let noMatchRow = document.createElement("tr");
-    let td = document.createElement("td");
-    td.colSpan = tableBody.closest("table").rows[0].cells.length;
-    td.style.textAlign = "center";
-    td.style.color = "black";
-    td.textContent = "No match found";
-    noMatchRow.appendChild(td);
-    tableBody.appendChild(noMatchRow);
   }
-}
-
 
   searchInput.addEventListener("keyup", applyFilters);
   sortSelect.addEventListener("change", applyFilters);
 }
+
 </script>
 
 </body>

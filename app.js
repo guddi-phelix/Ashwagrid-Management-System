@@ -1,5 +1,4 @@
-
-require('dotenv').config();
+require('dotenv').config({ override: true })
 
 const express = require('express');
 const session = require('express-session');
@@ -13,6 +12,7 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const creds = JSON.parse(process.env.GOOGLE_SHEET_CREDENTIALS);
 const { JWT } = require('google-auth-library');
 const { error } = require('console');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -20,10 +20,10 @@ const PORT = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('views'));
-app.use('/uploads', express.static('uploads')); 
+
+
 app.use(session({
   secret: 'bfieubfefi1',
   resave: false,
@@ -32,6 +32,95 @@ app.use(session({
     maxAge: 3600000 // ← this controls session duration in milliseconds
   }
 }));
+//setup for drive image
+
+const upload = multer({ dest: "uploads/" });
+
+// ===== Google Drive OAuth2 setup =====
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
+);
+
+const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
+const TOKEN_PATH = path.join(__dirname, "token.json");
+
+
+function setAuthFromSavedTokenIfAny() {
+  if (fs.existsSync(TOKEN_PATH)) {
+    const token = JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"));
+    oauth2Client.setCredentials(token);
+    return true;
+  }
+  return false;
+}
+
+
+function ensureAuthed(req, res, next) {
+  if (setAuthFromSavedTokenIfAny()) return next();
+  const url = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    prompt: "consent",
+    scope: SCOPES,
+  });
+  return res.redirect(url);
+}
+
+async function uploadFileAndGetLink(file) {
+  const drive = google.drive({ version: "v3", auth: oauth2Client });
+  const tempPath = file.path;
+  const fileName = file.originalname;
+
+  const uploadedFile = await drive.files.create({
+    resource: {
+      name: fileName,
+      parents: ["1s1cgCa_4rrSbMdiWWrvUpTICE-ZK2QbB"], // your folder ID
+    },
+    media: {
+      mimeType: file.mimetype,
+      body: fs.createReadStream(tempPath),
+    },
+    fields: "id",
+  });
+
+  const fileId = uploadedFile.data.id;
+
+  await drive.permissions.create({
+    fileId,
+    requestBody: {
+      role: "reader",
+      type: "anyone",
+    },
+  });
+
+  fs.unlinkSync(tempPath); // cleanup
+  return `https://drive.google.com/file/d/${fileId}/view`;
+}
+
+
+app.get("/google-login", (req, res) => {
+  const url = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    prompt: "consent",
+    scope: SCOPES,
+  });
+  res.redirect(url);
+});
+
+app.get("/oauth2callback", async (req, res) => {
+  try {
+    const { code } = req.query;
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+    fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens, null, 2));
+    res.redirect("/");
+  } catch (e) {
+    console.error("OAuth callback error:", e);
+    res.status(500).send("OAuth error. Check console.");
+  }
+});
+
 
 
 
@@ -63,7 +152,6 @@ app.post('/login', async (req, res) => {
 
     const driverData = await driverResult.json();
     console.log(driverData);
-    console.log(driverData.username);
 
 
     if (!driverData.success) {
@@ -137,15 +225,19 @@ app.post('/admin', async (req, res) => {
 });
 
 
-app.get('/leased-profile',(req, res) => {
-    if (!req.session.username || !req.session.leased) return res.redirect('/');
+app.get('/leased-profile', (req, res) => {
+  if (!req.session.username || !req.session.leased) return res.redirect('/');
+
+  const cleanPhoto = req.session.profilePhoto 
+    ? req.session.profilePhoto.trim() 
+    : 'https://via.placeholder.com/180';
+
   res.render('Lease_Driver_Profile', {
-  profilePhoto: req.session.profilePhoto || 'https://via.placeholder.com/180',
-  username: req.session.username,
-  agdId:req.session.agdId,
-  vehicleNumber: req.session.vehicleNumber,
-  isLeased: req.session.leased,
-  
+    profilePhoto: cleanPhoto,
+    username: req.session.username,
+    agdId: req.session.agdId,
+    vehicleNumber: req.session.vehicleNumber,
+    isLeased: req.session.leased,
   });
 });
 
@@ -157,7 +249,7 @@ app.get('/not-leased-profile',(req, res) => {
     vehicleNumber: req.session.vehicleNumber,
     agdId : req.session.agdId,
     isLeased: req.session.leased,
-    profilePhoto: req.session.profilePhoto
+    profilePhoto: req.session.profile_Photo
   });
 });
 
@@ -180,11 +272,6 @@ app.get('/trip-form', (req, res) => {
   res.render('trip_form', { error: null });
 });
 
-const storage = multer.diskStorage({
-  destination: './uploads',
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
-});
-const upload = multer({ storage });
 
 // Google Sheet setup
 const jwtClient = new JWT({
@@ -200,19 +287,19 @@ const doc3 = new GoogleSpreadsheet('1055AaVuJbiex-F-xxNXjPvCRCcG2ZgBeEAN5aLseZuU
 const doc5 = new GoogleSpreadsheet('1BjaACtElpoediYDcMZ1DJPX8G4bZKa6KYMbjB6mPUpw', jwtClient); //total os
 const doc6 = new GoogleSpreadsheet('1QCP9Hj4Hc1EkZeFdSZeHOnot5bzCEH0MC_o3p7sSuiE', jwtClient);//daily accounts
 const doc7 = new GoogleSpreadsheet('11w-Oc5Dc27kX5B67_VztGfJUafkfiDcVLo_NA3az5qU', jwtClient);//driver ids
+const doc8 = new GoogleSpreadsheet('1qZY44oiGylNUUCspqH7d7PWInKxZvNtmvLPWiAzsMdo', jwtClient);
 
-// Add row to sheet
 async function addToSheet(reading, photoLink, username, vehicleNumber, date) {
-  await doc.loadInfo();
-  const sheet = doc.sheetsByIndex[0];
+  await doc.loadInfo(); // load spreadsheet info
+  const sheet = doc.sheetsByIndex[0]; // first sheet
   await sheet.addRow({
     Date: date,
     Username: username,
     VehicleNumber: vehicleNumber,
     Reading: reading,
-    Photo: photoLink
+    Photo: photoLink,
   });
-  console.log('✅ Row added to sheet');
+  console.log("✅ Row added to sheet");
 }
 
 async function addToSheet1(cngQty, photoLink, username, vehicleNumber, date,reading,amount) {
@@ -242,95 +329,111 @@ async function addToSheet2(reading, photoLink, username, vehicleNumber, date) {
   console.log('✅ Row added to sheet');
 }
 
-
-app.get('/Before-start', (req, res) => {
+app.get('/before_start', (req, res) => {
   res.render('Before_start'); // or res.render(...) if using EJS
 });
 
-app.post('/Before-start', upload.single('photo'), async (req, res) => {
+app.post("/before_start", ensureAuthed, upload.single("file"), async (req, res) => { //before start route its 
   if (!req.session.username) return res.redirect('/');
+  const { reading } = req.body;  
 
-  const username = req.session.username;
-  const vehicleNumber = req.session.vehicleNumber;
-  const reading = req.body.reading;
-  const fileName = req.file.filename;
-
- const baseURL = process.env.BASE_URL || `http://localhost:${PORT}`;
-const photoLink = `${baseURL}/uploads/${fileName}`;
-
-  const date = new Date().toLocaleString('en-IN', {
+  try {
+    const username = req.session.username;
+    const vehicleNumber = req.session.vehicleNumber;
+    const photoLink = await uploadFileAndGetLink(req.file);
+   const date = new Date().toLocaleString('en-IN', {
     day: '2-digit', month: 'long', year: 'numeric',
     hour: '2-digit', minute: '2-digit', hour12: true
   });
-    console.log('📤 Submitting to sheet:', {
-    reading, photoLink, username, vehicleNumber, date
-  });
 
-  await addToSheet(reading, photoLink, username, vehicleNumber, date);
-  res.render('submit_page')
+    // Add row to Google Sheet
+    await addToSheet(reading, photoLink, username, vehicleNumber, date);
+
+    res.render("submit_page", {
+      message: `✅ File successfully uploaded! <a href="${photoLink}" target="_blank">View Image</a>`,
+      backLink: "/",
+    });
+  } catch (err) {
+    console.error("Upload error:", err);
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    res.status(500).send("Upload failed. Check server logs.");
+  }
 });
+
 app.get('/Filling-cng', (req, res) => {
   res.render('Filling_cng'); // or res.render(...) if using EJS
 });
 
+app.post("/Filling-cng", ensureAuthed, upload.single("file"), async (req, res) => {
+  if (!req.session.username) return res.redirect("/");
 
-app.post('/Filling-cng', upload.single('photo'), async (req, res) => {
-  if (!req.session.username) return res.redirect('/');
+  try {
+    const username = req.session.username;
+    const vehicleNumber = req.session.vehicleNumber;
+    const { cngQty, amount, reading } = req.body;
 
-  const username = req.session.username;
-  const vehicleNumber = req.session.vehicleNumber;
-  const cngQty = req.body.cngQty;
-  const amount = req.body.amount;
-  const reading = req.body.reading;
-  const fileName = req.file.filename;
-  const baseURL = process.env.BASE_URL || `http://localhost:${PORT}`;
-const photoLink = `${baseURL}/uploads/${fileName}`;
+    // Upload photo to Google Drive and get sharable link
+    const photoLink = await uploadFileAndGetLink(req.file);
 
-  const date = new Date().toLocaleString('en-IN', {
-    day: '2-digit', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', hour12: true
-  });
+    // Date + time formatted (Indian style)
+    const date = new Date().toLocaleString("en-IN", {
+      day: "2-digit", month: "long", year: "numeric",
+      hour: "2-digit", minute: "2-digit", hour12: true,
+    });
 
-  await addToSheet1(cngQty, photoLink, username, vehicleNumber, date,reading,amount);
-res.render('submit_page')
+    // Save to Google Sheet
+    await addToSheet1(cngQty, photoLink, username, vehicleNumber, date, reading, amount);
+
+    // Show success page
+    res.render("submit_page", {
+      message: `✅ CNG filling record saved! <a href="${photoLink}" target="_blank">View Image</a>`,
+      backLink: "/",
+    });
+
+  } catch (err) {
+    console.error("Upload error in /Filling-cng:", err);
+
+    // Clean up uploaded temp file if something breaks
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+
+    res.status(500).send("❌ Failed to save CNG record. Check server logs.");
+  }
 });
+
 
 app.get('/After-end', (req, res) => {
   res.render('After_end'); // or res.render(...) if using EJS
 });
 
-// app.post('/After-end', upload.single('photo'), async (req, res) => {
-//   try {
-//     if (!req.session.username) return res.redirect('/');
 
-//     const username = req.session.username;
-//     const vehicleNumber = req.session.vehicleNumber;
-//     const reading = req.body.reading;
+app.post("/After-end", ensureAuthed, upload.single("file"), async (req, res) => {
+   if (!req.session.username) return res.redirect('/');
+  const { reading } = req.body;  
 
-//     const localPath = req.file.path;
-//     const originalName = req.file.originalname;
+  try {
+    const username = req.session.username;
+    const vehicleNumber = req.session.vehicleNumber;
+    const photoLink = await uploadFileAndGetLink(req.file);
+   const date = new Date().toLocaleString('en-IN', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: true
+  });
 
-//     // Upload to Google Drive
-//     const photoLink = await uploadFileToDrive(localPath, originalName);
+    // Add row to Google Sheet
+    await addToSheet2(reading, photoLink, username, vehicleNumber, date);
 
-//     const date = new Date().toLocaleString('en-IN', {
-//       day: '2-digit', month: 'long', year: 'numeric',
-//       hour: '2-digit', minute: '2-digit', hour12: true
-//     });
+    res.render("submit_page", {
+      message: `✅ File successfully uploaded! <a href="${photoLink}" target="_blank">View Image</a>`,
+      backLink: "/",
+    });
+  } catch (err) {
+    console.error("Upload error:", err);
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    res.status(500).send("Upload failed. Check server logs.");
+  }
+});
 
-//     await addToSheet2(reading, photoLink, username, vehicleNumber, date);
 
-//     try { fs.unlinkSync(localPath); } catch (e) {
-//       console.warn("⚠️ Couldn't delete local file:", e.message);
-//     }
-
-//     res.render('submit_page');
-//   } catch (err) {
-//     console.error('❌ Error in /After-end:', err.stack);
-//     res.status(500).send('Something went wrong while uploading.');
-
-//   }
-// });
 
 // Total OS Route
 app.get('/Total_os', async (req, res) => {
@@ -637,9 +740,94 @@ app.get('/admin-view-nonlease-driver-profile', async (req, res) => {
 });
 
 
+// Route to get data for a specific driver
+app.get('/driver_daily_accounts', async (req, res) => {
+  try {
+    const username = req.session.username ? req.session.username.trim() : ''; // Get logged-in driver's username
+    console.log("user",username)
+    if (!username) {
+      return res.redirect('/'); // if not logged in
+    }
+  
+    await doc6.loadInfo();
+    const sheet = doc6.sheetsByIndex[0];
+    await sheet.loadHeaderRow(1);
 
+    const rows = await sheet.getRows();
+    console.log(rows)
+    // Filter only the data of this user
+    const driverData = rows
+      .filter(row => row._rawData[1] === username) // Driver_Name in index 1
+      .map(row => ({
+        AGD_ID: row._rawData[0],
+        Driver_Name: row._rawData[1],
+        Assigned_Car: row._rawData[2],
+        Date: row._rawData[3],
+        Cash_Collection: row._rawData[4],
+        Login_hours: row._rawData[5],
+        Toll: row._rawData[6],
+        CNG: row._rawData[7],
+        Driver_salary: row._rawData[8],
+        RTO: row._rawData[9],
+        Adjustment: row._rawData[10],
+        payable_amt: row._rawData[11],
+        Paid_amt: row._rawData[12],
+        Rent: row._rawData[13],
+        Rent_to_deposit: row._rawData[14],
+        deposit_to_rent: row._rawData[15],
+      }));
+    console.log("data:",driverData)
+    res.render('driver_daily_account', { driverData, layout: false });
 
+  } catch (error) {
+    console.error('❌ Error fetching driver data:', error);
+    res.send('⚠️ Failed to load driver data.');
+  }
+});
 
+// Route to get data for a specific driver
+app.get('/variable-performance', async (req, res) => {
+  try {
+    const vehicleNumber = req.session.vehicleNumber; // Get logged-in driver's username
+    console.log("user",vehicleNumber)
+    if (!vehicleNumber) {
+      return res.redirect('/'); // if not logged in
+    }
+  
+    await doc8.loadInfo();
+    const sheet = doc8.sheetsByIndex[0];
+    await sheet.loadHeaderRow(1);
+
+    const rows = await sheet.getRows();
+    
+    // Filter only the data of this user
+    const driverData = rows
+      .filter(row => row._rawData[2] === vehicleNumber) // Driver_Name in index 1
+      .map(row => ({
+        Date_from: row._rawData[0],
+        Date_to: row._rawData[1],
+        Car_number: row._rawData[2],
+        Due_amount: row._rawData[3],
+        Uber_trips: row._rawData[4],
+        Acceptance_rate: row._rawData[5],
+        Cancellation_rate: row._rawData[6],
+        Total_lease: row._rawData[7],
+        Total_earning: row._rawData[8],
+        Total_toll: row._rawData[9],
+        Comapany_penality: row._rawData[10],
+        RTO_fine: row._rawData[11],
+        TDS: row._rawData[12],
+        Adjustment: row._rawData[13],
+        Payment_made: row._rawData[14],
+      }));
+    console.log("data:",driverData)
+    res.render('Variable_performace', { driverData, layout: false });
+
+  } catch (error) {
+    console.error('❌ Error fetching driver data:', error);
+    res.send('⚠️ Failed to load driver data.');
+  }
+});
 
 
 

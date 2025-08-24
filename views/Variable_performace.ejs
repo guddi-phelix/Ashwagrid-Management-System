@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Variable Performance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f4f6f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;   /* added padding instead of centering */
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;  /* keeps content readable */
+      margin: 0 auto;    /* center horizontally */
+    }
+
+    .record {
+      background: #fff;
+      border-left: 6px solid #ff6600;
+      border-radius: 12px;
+      padding: 25px 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      margin-bottom: 20px; /* spacing between records */
+    }
+
+    .date-range {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ff6600;
+      margin-bottom: 8px;
+    }
+
+    .car-number {
+      font-size: 24px;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 12px;
+    }
+
+    .due-amount {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: #d32f2f;
+    }
+
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed #e1e1e1;
+    }
+
+    .field-row:last-child {
+      border-bottom: none;
+    }
+
+    .field-name {
+      font-size: 16px;
+      color: #555;
+    }
+
+    .field-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* Highlight values */
+    .positive {
+      color: #2e7d32;
+    }
+    .negative {
+      color: #c62828;
+    }
+    .neutral {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <% if (driverData && driverData.length > 0) { %>
+      <% driverData.forEach(record => { %>
+        <div class="record">
+          <div class="date-range"><%= record.Date_from %> TO <%= record.Date_to %></div>
+          <div class="car-number"><%= record.Car_number %></div>
+          <div class="due-amount">Due Amount: <%= record.Due_amount %></div>
+
+          <div class="field-row">
+            <div class="field-name">Uber Trips</div>
+            <div class="field-value"><%= record.Uber_trips %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Acceptance Rate</div>
+            <div class="field-value"><%= record.Acceptance_rate %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Cancellation Rate</div>
+            <div class="field-value"><%= record.Cancellation_rate %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Total Lease</div>
+            <div class="field-value negative"><%= record.Total_lease %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Total Earning</div>
+            <div class="field-value positive"><%= record.Total_earning %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Total Toll</div>
+            <div class="field-value neutral"><%= record.Total_toll %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Company Penalty</div>
+            <div class="field-value negative"><%= record.Comapany_penality %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">RTO Fine</div>
+            <div class="field-value negative"><%= record.RTO_fine %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">TDS</div>
+            <div class="field-value negative"><%= record.TDS %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Adjustment</div>
+            <div class="field-value neutral"><%= record.Adjustment %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Payment Made</div>
+            <div class="field-value positive"><%= record.Payment_made %></div>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p>No performance data available.</p>
+    <% } %>
+  </div>
+</body>
+</html>

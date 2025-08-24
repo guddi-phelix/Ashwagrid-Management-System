@@ -95,14 +95,15 @@
 
  
 
-  <form id="odoForm" action="/Before-start" method="POST" enctype="multipart/form-data" autocomplete="off">
+ <form action="/before_start" method="post" enctype="multipart/form-data" autocomplete="off">
     <h2>Submit ODO Meter Reading</h2>
 
     <label for="reading">ODO Meter Reading:</label>
     <input type="text" name="reading" id="reading" required>
 
     <label for="photo">Upload ODO Photo:</label>
-    <input type="file" name="photo" id="photo" accept="image/*" required>
+        <input type="file" name="file" accept="image/*" required />
+
 
     <button type="submit">Submit</button>
   </form>

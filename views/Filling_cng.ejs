@@ -94,8 +94,8 @@
   </style>
 </head>
 <body>
-    <div class="popup" id="successPopup">✔️ Data submitted successfully!</div>
-  <form action="/Filling-cng" method="POST" enctype="multipart/form-data" autocomplete="off">
+   
+  <form action="/Filling-cng" method="post" enctype="multipart/form-data" autocomplete="off">
     <h2>CNG Details</h2>
 
     <label>CNG quantity(kg):</label>
@@ -107,8 +107,8 @@
     <label>Odometer Reading:</label>
     <input type="text" name="reading" required>
 
-    <label>Odometer Photo:</label>
-    <input type="file" name="photo" required>
+    <label for="photo">Odometer Photo:</label>
+     <input type="file" name="file" accept="image/*" required />
 
     <button type="submit">Submit</button>
   </form>
