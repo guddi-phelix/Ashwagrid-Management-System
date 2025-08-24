@@ -13,6 +13,7 @@ const creds = JSON.parse(process.env.GOOGLE_SHEET_CREDENTIALS);
 const { JWT } = require('google-auth-library');
 const { error } = require('console');
 
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -126,7 +127,6 @@ app.get("/oauth2callback", async (req, res) => {
 
 // Routes
 app.get('/', (req, res) => {
-res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
 res.render('login', { error: null });
 });
 app.post('/logout', (req, res) => {
@@ -134,6 +134,12 @@ app.post('/logout', (req, res) => {
     res.redirect('/');
   });
 });
+function noCache(req, res, next) {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+}
 
 // driver login route
 
@@ -195,12 +201,23 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.get('/admin-dashboard', noCache,(req, res) => {
+  if (!req.session.admin) {
+    return res.redirect('/'); 
+  }
+
+  res.render('Admin_Dashboard', {
+    username: req.session.admin
+    
+  });
+});
 
 // Admin login route
 app.post('/admin', async (req, res) => {
   const SECRET_TOKEN = 'sec@12jfl..idwh23';
     try {
         const { username, password } = req.body;
+        const admin = username;
 
         if (!username || !password) {
             return res.status(400).json({ success: false, error: "Missing credentials" });
@@ -212,8 +229,11 @@ app.post('/admin', async (req, res) => {
         const data = await response.json();
 
         if (data.success) {
-            // ✅ Correct credentials
-            res.render("Admin_Dashboard", { username });
+           req.session.admin = admin;
+           console.log(req.session.admin)
+            
+           res.redirect('/admin-dashboard');
+           
         } else {
             // ❌ Wrong credentials
             return res.status(401).json({ success: false, error: "Invalid username or password" });
@@ -225,13 +245,19 @@ app.post('/admin', async (req, res) => {
 });
 
 
-app.get('/leased-profile', (req, res) => {
+app.get('/leased-profile',(req, res) => {
+  
   if (!req.session.username || !req.session.leased) return res.redirect('/');
 
-  const cleanPhoto = req.session.profilePhoto 
-    ? req.session.profilePhoto.trim() 
-    : 'https://via.placeholder.com/180';
+  res.redirect('/lease-driver-profile');
+});
 
+app.get('/lease-driver-profile', noCache,(req, res) => {
+  if (!req.session.username || !req.session.leased) {
+    return res.redirect('/');
+  }
+
+  const cleanPhoto = req.session.profilePhoto;
   res.render('Lease_Driver_Profile', {
     profilePhoto: cleanPhoto,
     username: req.session.username,
@@ -241,15 +267,23 @@ app.get('/leased-profile', (req, res) => {
   });
 });
 
-
 app.get('/not-leased-profile',(req, res) => {
   if (!req.session.username || req.session.leased) return res.redirect('/');
+
+  res.redirect('/driver-profile');
+  
+});
+app.get('/driver-profile', noCache,(req, res) => {
+  if (!req.session.username || req.session.leased) {
+    return res.redirect('/');
+  }
+  const cleanPhoto = req.session.profilePhoto;
   res.render('Driver_Profile', {
+    profilePhoto: cleanPhoto,
     username: req.session.username,
+    agdId: req.session.agdId,
     vehicleNumber: req.session.vehicleNumber,
-    agdId : req.session.agdId,
-    isLeased: req.session.leased,
-    profilePhoto: req.session.profile_Photo
+    isLeased: req.session.leased
   });
 });
 
@@ -330,6 +364,8 @@ async function addToSheet2(reading, photoLink, username, vehicleNumber, date) {
 }
 
 app.get('/before_start', (req, res) => {
+   if (!req.session.username) {
+    return res.redirect('/'); }
   res.render('Before_start'); // or res.render(...) if using EJS
 });
 
@@ -349,10 +385,7 @@ app.post("/before_start", ensureAuthed, upload.single("file"), async (req, res) 
     // Add row to Google Sheet
     await addToSheet(reading, photoLink, username, vehicleNumber, date);
 
-    res.render("submit_page", {
-      message: `✅ File successfully uploaded! <a href="${photoLink}" target="_blank">View Image</a>`,
-      backLink: "/",
-    });
+    res.redirect("submit-page");
   } catch (err) {
     console.error("Upload error:", err);
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
@@ -360,7 +393,15 @@ app.post("/before_start", ensureAuthed, upload.single("file"), async (req, res) 
   }
 });
 
+app.get('/submit-page', (req, res) => {
+   if (!req.session.username) {
+    return res.redirect('/'); }
+  res.render('submit_page'); // or res.render(...) if using EJS
+});
+
 app.get('/Filling-cng', (req, res) => {
+   if (!req.session.username) {
+    return res.redirect('/'); }
   res.render('Filling_cng'); // or res.render(...) if using EJS
 });
 
@@ -402,6 +443,8 @@ app.post("/Filling-cng", ensureAuthed, upload.single("file"), async (req, res) =
 
 
 app.get('/After-end', (req, res) => {
+   if (!req.session.username) {
+    return res.redirect('/'); }
   res.render('After_end'); // or res.render(...) if using EJS
 });
 
@@ -437,6 +480,9 @@ app.post("/After-end", ensureAuthed, upload.single("file"), async (req, res) => 
 
 // Total OS Route
 app.get('/Total_os', async (req, res) => {
+    if (!req.session.admin) {
+    return res.redirect('/'); 
+  }
   try {
     await doc5.loadInfo();
     const sheet = doc5.sheetsByIndex[0];
@@ -465,7 +511,9 @@ app.get('/Total_os', async (req, res) => {
 
 
 // Daily accounts
-app.get('/Daily_accounts', async (req, res) => {
+app.get('/Daily_accounts', async (req, res) =>  { 
+  if (!req.session.admin) {
+    return res.redirect('/'); }
   try {
     await doc6.loadInfo();
     const sheet = doc6.sheetsByIndex[0];
@@ -499,10 +547,13 @@ app.get('/Daily_accounts', async (req, res) => {
     console.error('❌ Error fetching leased drivers:', error);
     res.send('⚠️ Failed to load leased drivers.');
   }
+
 });
 
 
 app.get('/Weekly_accounts', async (req, res) => {
+   if (!req.session.admin) {
+    return res.redirect('/'); }
   try {
     await doc6.loadInfo();
     const sheet = doc6.sheetsByIndex[0];
@@ -535,6 +586,8 @@ app.get('/Weekly_accounts', async (req, res) => {
 });
 // driver ids
 app.get('/Driver_ids', async (req, res) => {
+   if (!req.session.admin) {
+    return res.redirect('/'); }
   try {
     await doc7.loadInfo();
 
@@ -595,6 +648,8 @@ app.get('/Driver_ids', async (req, res) => {
 });
 //car history
 app.get('/Car_History', async (req, res) => {
+   if (!req.session.admin) {
+    return res.redirect('/'); }
   try {
     await doc3.loadInfo();
     const sheet = doc3.sheetsByIndex[0];
@@ -604,16 +659,16 @@ app.get('/Car_History', async (req, res) => {
 
     const Car_History = rows.map(row => ({
       Allocation_ID:row._rawData[0],
-      Car_Number: row._rawData[2],
-      Car_Type:row._rawData[3],
+      Car_Number: row._rawData[1],
+      Car_Type:row._rawData[2],
       AGD_ID:row._rawData[3],
       Driver_Name:row._rawData[4],
      Format: row._rawData[5] === "Sub-Lease" ? "Lease" : row._rawData[5],
-
       Date_From:row._rawData[6],
       Date_To: row._rawData[7],
       Total_Days:row._rawData[8],
-      UUID:row._rawData[10],
+      UUID:row._rawData[9],
+      photo:row._rawData[10]
     }));
     console.log(Car_History)
     res.render('Car_History', { Car_History, layout: false }); // 🔁 use short version + layout: false
@@ -627,6 +682,8 @@ app.get('/Car_History', async (req, res) => {
 
 // Lease Drivers Route
 app.get('/leased-drivers', async (req, res) => {
+   if (!req.session.admin) {
+    return res.redirect('/'); }
   try {
     await doc3.loadInfo();
     const sheet = doc3.sheetsByIndex[0];
@@ -653,6 +710,8 @@ app.get('/leased-drivers', async (req, res) => {
 
 // Non-Lease Drivers Route
 app.get('/non-leased-drivers', async (req, res) => {
+   if (!req.session.admin) {
+    return res.redirect('/'); }
   try {
     await doc3.loadInfo();
     const sheet = doc3.sheetsByIndex[0];
@@ -681,6 +740,8 @@ app.get('/non-leased-drivers', async (req, res) => {
 
 
 app.get('/admin-view-lease-driver-profile',async (req, res) => {
+   if (!req.session.admin) {
+    return res.redirect('/'); }
   const username = req.query.username;
   console.log(username)
   const token ='sec@12jfl..idwh23';
@@ -712,6 +773,8 @@ app.get('/admin-view-lease-driver-profile',async (req, res) => {
 });
 
 app.get('/admin-view-nonlease-driver-profile', async (req, res) => {
+   if (!req.session.admin) {
+    return res.redirect('/'); }
   const username = req.query.username;
   const token ='sec@12jfl..idwh23';
 
@@ -742,6 +805,8 @@ app.get('/admin-view-nonlease-driver-profile', async (req, res) => {
 
 // Route to get data for a specific driver
 app.get('/driver_daily_accounts', async (req, res) => {
+  if (!req.session.username) {
+    return res.redirect('/'); }
   try {
     const username = req.session.username ? req.session.username.trim() : ''; // Get logged-in driver's username
     console.log("user",username)
@@ -787,6 +852,8 @@ app.get('/driver_daily_accounts', async (req, res) => {
 
 // Route to get data for a specific driver
 app.get('/variable-performance', async (req, res) => {
+   if (!req.session.username) {
+    return res.redirect('/'); }
   try {
     const vehicleNumber = req.session.vehicleNumber; // Get logged-in driver's username
     console.log("user",vehicleNumber)

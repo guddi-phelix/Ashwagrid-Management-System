@@ -1,12 +1,12 @@
 <!-- Lease Driver List -->
-<div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif; height: 80vh; display: flex; flex-direction: column;">
+<div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif;">
   <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Car History</h2>
-  
-  <!-- Scrollable Table Wrapper -->
-  <div style="flex: 1; overflow-x: auto; overflow-y: auto; border: 1px solid #ddd; border-radius: 12px;">
-    <table style="width: 100%; border-collapse: collapse; min-width: 1200px;">
-      <thead style="background-color: #f8b500; color: white; position: sticky; top: 0; z-index: 10;">
-        <tr>
+
+  <!-- Scrollable container with only vertical scroll -->
+  <div style="max-height: 500px; overflow-y: auto; overflow-x: auto; width: 100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <table style="min-width: 1600px; border-collapse: collapse;">
+      <thead>
+     <tr style="background-color: #f8b500; color: white; position: sticky; top: 0; z-index: 2;">
           <th style="padding: 12px; background-color: #f8b500;">Allocation ID</th>
           <th style="padding: 12px; background-color: #f8b500;">Car Number</th>
           <th style="padding: 12px; background-color: #f8b500;">Car Type</th>
@@ -17,6 +17,7 @@
           <th style="padding: 12px; background-color: #f8b500;">Date To</th>
           <th style="padding: 12px; background-color: #f8b500;">Total Days</th>
           <th style="padding: 12px; background-color: #f8b500;">UUID</th>
+          <th style="padding: 12px; background-color: #f8b500;">Profile Image</th>
         </tr>
       </thead>
       <tbody>
@@ -32,9 +33,25 @@
             <td style="padding: 12px;"><%= driver.Date_To %></td>
             <td style="padding: 12px;"><%= driver.Total_Days %></td>
             <td style="padding: 12px;"><%= driver.UUID %></td>
+             <td>
+              <% if (driver.photo) { %>
+                <img src="<%= driver.photo %>" alt="Photo" class="driver-photo">
+              <% } else { %>
+                <span style="color: gray;">No Photo</span>
+              <% } %>
+            </td>
           </tr>
         <% }) %>
       </tbody>
     </table>
   </div>
 </div>
+<style>
+    .driver-photo {
+    height: 80px;
+    width: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #f8b500;
+  }
+</style>

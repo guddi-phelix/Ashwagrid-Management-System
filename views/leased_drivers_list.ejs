@@ -34,6 +34,15 @@
     height: 100%;
     overflow: hidden; /* Prevent page scroll */
   }
+
+  /* ✅ Profile image style */
+  .driver-photo {
+    height: 80px;
+    width: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #f8b500;
+  }
 </style>
 
 <div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif; height: 100%;">
@@ -54,7 +63,7 @@
           <tr style="background-color: #fff; border-bottom: 1px solid #ddd;">
             <td>
               <% if (driver.photo) { %>
-                <img src="<%= driver.photo %>" alt="Photo" style="height: 60px; width: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #f8b500;">
+                <img src="<%= driver.photo %>" alt="Photo" class="driver-photo">
               <% } else { %>
                 <span style="color: gray;">No Photo</span>
               <% } %>

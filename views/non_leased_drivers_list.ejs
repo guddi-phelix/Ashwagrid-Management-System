@@ -1,8 +1,8 @@
 <style>
-  /* Scrollable container (same as Lease Cars) */
-  .nonlease-table-scroll {
+  /* Scrollable container */
+  .lease-table-scroll {
     width: 100%;
-    height: calc(100vh - 200px); /* Adjust for header/menu */
+    height: calc(100vh - 200px); /* Adjust depending on header/menu height */
     overflow-y: auto;
     overflow-x: auto;
     border-radius: 12px;
@@ -13,14 +13,14 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px; /* Allows horizontal scroll if needed */
+    min-width: 800px; /* Makes horizontal scroll possible if narrow screen */
   }
 
   thead {
     background-color: #f8b500;
     color: white;
     position: sticky;
-    top: 0;
+    top: 0; /* Keeps column headings fixed */
     z-index: 2;
   }
 
@@ -29,37 +29,27 @@
     text-align: center;
   }
 
-  /* Button styling (same as before) */
-  .profile-btn {
-    padding: 8px 16px;
-    background-color: #f8b500;
-    border: none;
-    color: white;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    transition: background 0.3s, transform 0.2s;
-  }
-
-  .profile-btn:hover {
-    background-color: #ff9f1c;
-    transform: scale(1.05);
-  }
-
-  /* Prevent page scroll */
   html, body {
     margin: 0;
     height: 100%;
-    overflow: hidden;
+    overflow: hidden; /* Prevent page scroll */
+  }
+
+  /* ✅ Profile image style */
+  .driver-photo {
+    height: 80px;
+    width: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #f8b500;
   }
 </style>
 
-<div id="nonLeaseDriverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif; height: 100%;">
-  <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Non-Lease Cars</h2>
+<div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif; height: 100%;">
+  <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Non Lease Cars</h2>
   
-  <div class="nonlease-table-scroll">
-    <table class="driver-table">
+  <div class="lease-table-scroll">
+    <table>
       <thead>
         <tr>
           <th>Profile Photo</th>
@@ -73,7 +63,7 @@
           <tr style="background-color: #fff; border-bottom: 1px solid #ddd;">
             <td>
               <% if (driver.photo) { %>
-                <img src="<%= driver.photo %>" alt="Photo" style="height: 60px; width: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #f8b500;">
+                <img src="<%= driver.photo %>" alt="Photo" class="driver-photo">
               <% } else { %>
                 <span style="color: gray;">No Photo</span>
               <% } %>
@@ -81,9 +71,13 @@
             <td><%= driver.username %></td>
             <td><%= driver.vehicle %></td>
             <td>
-              <form action="/admin-view-nonlease-driver-profile" method="GET">
+              <form action="/admin-view-lease-driver-profile" method="GET">
                 <input type="hidden" name="username" value="<%= driver.username %>">
-                <button type="submit" class="profile-btn">View Profile</button>
+                <button type="submit" style="padding: 8px 16px; background-color: #f8b500; border: none; color: white; border-radius: 8px; font-weight: 500; cursor: pointer; transition: background-color 0.3s ease; font-family: 'Poppins', sans-serif;" 
+                  onmouseover="this.style.backgroundColor='#d99400'" 
+                  onmouseout="this.style.backgroundColor='#f8b500'">
+                  View Profile
+                </button>
               </form>
             </td>
           </tr>

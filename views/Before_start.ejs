@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>ODO Meter Form</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- ✅ Mobile scaling -->
   <style>
     * {
       font-family: 'Poppins', sans-serif;
@@ -17,13 +18,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      padding: 15px;
     }
 
     form {
       background-color: #fff;
       padding: 30px 40px;
-      border-radius: 12px;
+      border-radius: 14px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 600px;
@@ -33,41 +35,41 @@
       text-align: center;
       margin-bottom: 25px;
       color: #333;
-      font-size: 24px;
+      font-size: 26px;
     }
 
     label {
-      font-size: 16px;
-      color: #555;
+      font-size: 18px;
+      color: #444;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     input[type="text"],
     input[type="file"] {
       width: 100%;
-      padding: 10px 12px;
+      padding: 14px 16px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
+      border-radius: 10px;
+      font-size: 18px;
       transition: 0.3s ease;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
     input[type="text"]:hover,
     input[type="file"]:hover {
       border-color: #8e44ad;
-      background-color: #f9f1ff;
+      background-color: #faf4ff;
     }
 
     button {
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
+      padding: 16px;
+      font-size: 18px;
       background-color: #8e44ad;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
       transition: background 0.3s ease;
     }
@@ -76,55 +78,69 @@
       background-color: #732d91;
     }
 
-    /* Popup Styling */
-    .popup {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background-color: #4BB543;
-      color: white;
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-      display: none;
-      font-weight: 500;
+   
+    /* ✅ Mobile Responsive */
+    @media (max-width: 600px) {
+      form {
+        padding: 20px;
+        width: 90%;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      label {
+        font-size: 16px;
+      }
+
+      input[type="text"],
+      input[type="file"] {
+        font-size: 16px;
+        padding: 12px;
+      }
+
+      button {
+        font-size: 16px;
+        padding: 14px;
+      }
     }
   </style>
 </head>
 <body>
 
- 
-
- <form action="/before_start" method="post" enctype="multipart/form-data" autocomplete="off">
-    <h2>Submit ODO Meter Reading</h2>
+  <form action="/before_start" method="post" enctype="multipart/form-data" autocomplete="off">
+    <h2> ODO Meter Reading</h2>
 
     <label for="reading">ODO Meter Reading:</label>
     <input type="text" name="reading" id="reading" required>
 
     <label for="photo">Upload ODO Photo:</label>
-        <input type="file" name="file" accept="image/*" required />
-
+    <input type="file" name="file" accept="image/*" required />
 
     <button type="submit">Submit</button>
   </form>
-<script>
-  window.onload = function () {
-    const form = document.querySelector('form');
-    form.reset();
-  };
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const isSuccess = urlParams.get('success');
 
-  if (isSuccess) {
-    const popup = document.getElementById('successPopup');
-    popup.style.display = 'block';
 
-    setTimeout(() => {
-      popup.style.display = 'none';
-      window.history.replaceState(null, null, window.location.pathname);
-    }, 3000);
-  }
-</script>
+  <script>
+    window.onload = function () {
+      const form = document.querySelector('form');
+      form.reset();
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isSuccess = urlParams.get('success');
+
+    if (isSuccess) {
+      const popup = document.getElementById('successPopup');
+      popup.style.display = 'block';
+
+      setTimeout(() => {
+        popup.style.display = 'none';
+        window.history.replaceState(null, null, window.location.pathname);
+      }, 3000);
+    }
+  </script>
 </body>
 </html>

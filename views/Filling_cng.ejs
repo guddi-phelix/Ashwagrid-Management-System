@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>⛽ Filling CNG Form</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- ✅ Mobile scaling -->
   <style>
     * {
       margin: 0;
@@ -16,7 +18,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      padding: 15px;
     }
 
     form {
@@ -32,42 +35,43 @@
       text-align: center;
       color: #333;
       margin-bottom: 25px;
+      font-size: 26px;
     }
 
     label {
       font-weight: 500;
       color: #444;
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      font-size: 18px;
     }
 
     input[type="text"],
     input[type="file"],
-    input[type="number"]
-     {
+    input[type="number"] {
       width: 100%;
-      padding: 10px 12px;
+      padding: 14px 16px;
       border: 1px solid #ccc;
-      border-radius: 8px;
+      border-radius: 10px;
       outline: none;
-      font-size: 16px;
-      margin-bottom: 20px;
+      font-size: 18px;
+      margin-bottom: 25px;
       transition: 0.3s ease;
     }
 
     input[type="text"]:focus,
     input[type="file"]:focus,
-    input[type="number"]:focus  {
+    input[type="number"]:focus {
       border-color: #8a2be2;
-      box-shadow: 0 0 5px rgba(138, 43, 226, 0.3);
+      box-shadow: 0 0 6px rgba(138, 43, 226, 0.3);
     }
 
     button {
       width: 100%;
-      padding: 12px;
+      padding: 16px;
       background-color: #8a2be2;
       color: white;
-      font-size: 16px;
+      font-size: 18px;
       border: none;
       border-radius: 10px;
       cursor: pointer;
@@ -78,18 +82,34 @@
       background-color: #6f1fd1;
       transform: scale(1.02);
     }
-        /* Popup Styling */
-    .popup {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background-color: #4BB543;
-      color: white;
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-      display: none;
-      font-weight: 500;
+
+    /* ✅ Mobile Responsive */
+    @media (max-width: 600px) {
+      form {
+        padding: 20px;
+        width: 90%;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      label {
+        font-size: 16px;
+      }
+
+      input[type="text"],
+      input[type="file"],
+      input[type="number"] {
+        font-size: 16px;
+        padding: 12px;
+        margin-bottom: 20px;
+      }
+
+      button {
+        font-size: 16px;
+        padding: 14px;
+      }
     }
   </style>
 </head>
@@ -98,7 +118,7 @@
   <form action="/Filling-cng" method="post" enctype="multipart/form-data" autocomplete="off">
     <h2>CNG Details</h2>
 
-    <label>CNG quantity(kg):</label>
+    <label>CNG quantity (kg):</label>
     <input type="text" name="cngQty" required>
 
     <label>CNG Amount (₹):</label>
@@ -108,28 +128,29 @@
     <input type="text" name="reading" required>
 
     <label for="photo">Odometer Photo:</label>
-     <input type="file" name="file" accept="image/*" required />
+    <input type="file" name="file" accept="image/*" required />
 
     <button type="submit">Submit</button>
   </form>
- <script>
-  window.onload = function () {
-    const form = document.querySelector('form');
-    form.reset();
-  };
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const isSuccess = urlParams.get('success');
+  <script>
+    window.onload = function () {
+      const form = document.querySelector('form');
+      form.reset();
+    };
 
-  if (isSuccess) {
-    const popup = document.getElementById('successPopup');
-    popup.style.display = 'block';
+    const urlParams = new URLSearchParams(window.location.search);
+    const isSuccess = urlParams.get('success');
 
-    setTimeout(() => {
-      popup.style.display = 'none';
-      window.history.replaceState(null, null, window.location.pathname);
-    }, 3000);
-  }
-</script>
+    if (isSuccess) {
+      const popup = document.getElementById('successPopup');
+      popup.style.display = 'block';
+
+      setTimeout(() => {
+        popup.style.display = 'none';
+        window.history.replaceState(null, null, window.location.pathname);
+      }, 3000);
+    }
+  </script>
 </body>
 </html>

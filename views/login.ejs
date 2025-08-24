@@ -186,6 +186,42 @@
       text-align: center;
       user-select: none;
     }
+
+
+@media (max-width: 480px) {
+  .login-box {
+    width:65%;
+    padding: 20px 15px 25px;
+    border-radius: 12px;
+  }
+  h2 {
+    font-size: 20px;
+  }
+  .toggle-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .toggle-btn {
+    width: 100%;
+    font-size: 15px;
+  }
+  .input-group input {
+    font-size: 14px;
+  }
+  button {
+    font-size: 15px;
+    padding: 10px 0;
+  }
+.toggle-container {
+    flex-direction: row;   /* Keep side by side */
+    gap: 8px;              /* Smaller gap for mobile */
+  }
+  .toggle-btn {
+    font-size: 14px;
+    padding: 8px 0;
+  }
+}
+
   </style>
 </head>
 <body>
