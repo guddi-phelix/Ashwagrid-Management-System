@@ -1,4 +1,5 @@
-require('dotenv').config({ override: true })
+require('dotenv').config();
+
 
 const express = require('express');
 const session = require('express-session');
@@ -311,18 +312,6 @@ app.get('/before_start', (req, res) => {
    if (!req.session.username) {
     return res.redirect('/'); }
   res.render('Before_start'); // or res.render(...) if using EJS
-});
-app.get('/image/:id', async (req, res) => {
-  try {
-    const image = await mongoose.model('TempImage').findById(req.params.id);
-    if (!image) return res.status(404).send('Image not found');
-
-    res.set('Content-Type', image.img.contentType);
-    res.send(image.img.data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading image');
-  }
 });
 
 app.post("/before_start", upload.single("file"), async (req, res) => {
