@@ -59,6 +59,32 @@ function noCache(req, res, next) {
   next();
 }
 
+//image code for forms
+const imageSchema = new mongoose.Schema({
+  img: {
+    data: Buffer,
+    contentType: String
+  },
+  uploadedAt: { type: Date, default: Date.now } // optional: track upload time
+});
+
+const Image = mongoose.model("Image", imageSchema); 
+
+
+
+app.get("/image/:id", async (req, res) => {
+  try {
+    const image = await Image.findById(req.params.id);
+    if (!image) return res.status(404).send("Image not found");
+
+    res.set("Content-Type", image.img.contentType);
+    res.send(image.img.data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error loading image");
+  }
+});
+
 // driver login route
 
 app.post('/login', async (req, res) => {
@@ -299,7 +325,6 @@ app.get('/image/:id', async (req, res) => {
   }
 });
 
-
 app.post("/before_start", upload.single("file"), async (req, res) => {
   if (!req.session.username) return res.redirect('/');
   const { reading } = req.body;
@@ -308,16 +333,7 @@ app.post("/before_start", upload.single("file"), async (req, res) => {
     const username = req.session.username;
     const vehicleNumber = req.session.vehicleNumber;
 
-    // ===== Upload image to MongoDB =====
-    const imageSchema = new mongoose.Schema({
-      img: {
-        data: Buffer,
-        contentType: String
-      }
-    });
-
-    const Image = mongoose.model('TempImage', imageSchema); // temporary model for this upload
-
+    // ===== Upload image to MongoDB using global Image model =====
     const newImage = new Image({
       img: {
         data: req.file.buffer,
@@ -364,15 +380,6 @@ app.post("/Filling-cng", upload.single("file"), async (req, res) => {
     const { cngQty, amount, reading } = req.body;
 
     // ===== Upload photo to MongoDB =====
-    const imageSchema = new mongoose.Schema({
-      img: {
-        data: Buffer,
-        contentType: String
-      }
-    });
-
-    const Image = mongoose.model("CngImage", imageSchema); // persistent model for CNG uploads
-
     const newImage = new Image({
       img: {
         data: req.file.buffer,
@@ -408,7 +415,7 @@ app.post("/Filling-cng", upload.single("file"), async (req, res) => {
   } catch (err) {
     console.error("Upload error in /Filling-cng:", err);
 
-    // Clean up uploaded temp file if exists
+    // Clean up temp file if exists
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
 
     res.status(500).send("❌ Failed to save CNG record. Check server logs.");
@@ -431,16 +438,7 @@ app.post("/After-end", upload.single("file"), async (req, res) => {
     const username = req.session.username;
     const vehicleNumber = req.session.vehicleNumber;
 
-    // ===== Upload photo to MongoDB =====
-    const imageSchema = new mongoose.Schema({
-      img: {
-        data: Buffer,
-        contentType: String
-      }
-    });
-
-    const Image = mongoose.model("AfterEndImage", imageSchema); // persistent model for After-end uploads
-
+    // ===== Upload photo to MongoDB using global Image model =====
     const newImage = new Image({
       img: {
         data: req.file.buffer,
