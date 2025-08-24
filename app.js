@@ -12,7 +12,10 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const creds = JSON.parse(process.env.GOOGLE_SHEET_CREDENTIALS);
 const { JWT } = require('google-auth-library');
 const { error } = require('console');
-
+const mongoose = require('mongoose');
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,94 +37,8 @@ app.use(session({
   }
 }));
 //setup for drive image
-
-const upload = multer({ dest: "uploads/" });
-
-// ===== Google Drive OAuth2 setup =====
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI
-);
-
-const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
-const TOKEN_PATH = path.join(__dirname, "token.json");
-
-
-function setAuthFromSavedTokenIfAny() {
-  if (fs.existsSync(TOKEN_PATH)) {
-    const token = JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"));
-    oauth2Client.setCredentials(token);
-    return true;
-  }
-  return false;
-}
-
-
-function ensureAuthed(req, res, next) {
-  if (setAuthFromSavedTokenIfAny()) return next();
-  const url = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    prompt: "consent",
-    scope: SCOPES,
-  });
-  return res.redirect(url);
-}
-
-async function uploadFileAndGetLink(file) {
-  const drive = google.drive({ version: "v3", auth: oauth2Client });
-  const tempPath = file.path;
-  const fileName = file.originalname;
-
-  const uploadedFile = await drive.files.create({
-    resource: {
-      name: fileName,
-      parents: ["1s1cgCa_4rrSbMdiWWrvUpTICE-ZK2QbB"], // your folder ID
-    },
-    media: {
-      mimeType: file.mimetype,
-      body: fs.createReadStream(tempPath),
-    },
-    fields: "id",
-  });
-
-  const fileId = uploadedFile.data.id;
-
-  await drive.permissions.create({
-    fileId,
-    requestBody: {
-      role: "reader",
-      type: "anyone",
-    },
-  });
-
-  fs.unlinkSync(tempPath); // cleanup
-  return `https://drive.google.com/file/d/${fileId}/view`;
-}
-
-
-app.get("/google-login", (req, res) => {
-  const url = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    prompt: "consent",
-    scope: SCOPES,
-  });
-  res.redirect(url);
-});
-
-app.get("/oauth2callback", async (req, res) => {
-  try {
-    const { code } = req.query;
-    const { tokens } = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens);
-    fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens, null, 2));
-    res.redirect("/");
-  } catch (e) {
-    console.error("OAuth callback error:", e);
-    res.status(500).send("OAuth error. Check console.");
-  }
-});
-
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 
 
@@ -368,24 +285,62 @@ app.get('/before_start', (req, res) => {
     return res.redirect('/'); }
   res.render('Before_start'); // or res.render(...) if using EJS
 });
+app.get('/image/:id', async (req, res) => {
+  try {
+    const image = await mongoose.model('TempImage').findById(req.params.id);
+    if (!image) return res.status(404).send('Image not found');
 
-app.post("/before_start", ensureAuthed, upload.single("file"), async (req, res) => { //before start route its 
+    res.set('Content-Type', image.img.contentType);
+    res.send(image.img.data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error loading image');
+  }
+});
+
+
+app.post("/before_start", upload.single("file"), async (req, res) => {
   if (!req.session.username) return res.redirect('/');
-  const { reading } = req.body;  
+  const { reading } = req.body;
 
   try {
     const username = req.session.username;
     const vehicleNumber = req.session.vehicleNumber;
-    const photoLink = await uploadFileAndGetLink(req.file);
-   const date = new Date().toLocaleString('en-IN', {
-    day: '2-digit', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', hour12: true
-  });
 
-    // Add row to Google Sheet
+    // ===== Upload image to MongoDB =====
+    const imageSchema = new mongoose.Schema({
+      img: {
+        data: Buffer,
+        contentType: String
+      }
+    });
+
+    const Image = mongoose.model('TempImage', imageSchema); // temporary model for this upload
+
+    const newImage = new Image({
+      img: {
+        data: req.file.buffer,
+        contentType: req.file.mimetype
+      }
+    });
+
+    const savedImage = await newImage.save();
+
+    // ===== Generate public link =====
+    const baseUrl = req.protocol + '://' + req.get('host');
+    const photoLink = `${baseUrl}/image/${savedImage._id}`;
+
+    // ===== Format current date =====
+    const date = new Date().toLocaleString('en-IN', {
+      day: '2-digit', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+
+    // ===== Add row to Google Sheet =====
     await addToSheet(reading, photoLink, username, vehicleNumber, date);
 
     res.redirect("submit-page");
+
   } catch (err) {
     console.error("Upload error:", err);
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
@@ -393,19 +348,13 @@ app.post("/before_start", ensureAuthed, upload.single("file"), async (req, res) 
   }
 });
 
+
 app.get('/submit-page', (req, res) => {
    if (!req.session.username) {
     return res.redirect('/'); }
   res.render('submit_page'); // or res.render(...) if using EJS
 });
-
-app.get('/Filling-cng', (req, res) => {
-   if (!req.session.username) {
-    return res.redirect('/'); }
-  res.render('Filling_cng'); // or res.render(...) if using EJS
-});
-
-app.post("/Filling-cng", ensureAuthed, upload.single("file"), async (req, res) => {
+app.post("/Filling-cng", upload.single("file"), async (req, res) => {
   if (!req.session.username) return res.redirect("/");
 
   try {
@@ -413,19 +362,43 @@ app.post("/Filling-cng", ensureAuthed, upload.single("file"), async (req, res) =
     const vehicleNumber = req.session.vehicleNumber;
     const { cngQty, amount, reading } = req.body;
 
-    // Upload photo to Google Drive and get sharable link
-    const photoLink = await uploadFileAndGetLink(req.file);
-
-    // Date + time formatted (Indian style)
-    const date = new Date().toLocaleString("en-IN", {
-      day: "2-digit", month: "long", year: "numeric",
-      hour: "2-digit", minute: "2-digit", hour12: true,
+    // ===== Upload photo to MongoDB =====
+    const imageSchema = new mongoose.Schema({
+      img: {
+        data: Buffer,
+        contentType: String
+      }
     });
 
-    // Save to Google Sheet
+    const Image = mongoose.model("CngImage", imageSchema); // persistent model for CNG uploads
+
+    const newImage = new Image({
+      img: {
+        data: req.file.buffer,
+        contentType: req.file.mimetype
+      }
+    });
+
+    const savedImage = await newImage.save();
+
+    // ===== Generate public link =====
+    const baseUrl = req.protocol + "://" + req.get("host");
+    const photoLink = `${baseUrl}/image/${savedImage._id}`;
+
+    // ===== Format current date (Indian style) =====
+    const date = new Date().toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    // ===== Save record to Google Sheet =====
     await addToSheet1(cngQty, photoLink, username, vehicleNumber, date, reading, amount);
 
-    // Show success page
+    // ===== Show success page with link =====
     res.render("submit_page", {
       message: `✅ CNG filling record saved! <a href="${photoLink}" target="_blank">View Image</a>`,
       backLink: "/",
@@ -434,12 +407,13 @@ app.post("/Filling-cng", ensureAuthed, upload.single("file"), async (req, res) =
   } catch (err) {
     console.error("Upload error in /Filling-cng:", err);
 
-    // Clean up uploaded temp file if something breaks
+    // Clean up uploaded temp file if exists
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
 
     res.status(500).send("❌ Failed to save CNG record. Check server logs.");
   }
 });
+
 
 
 app.get('/After-end', (req, res) => {
@@ -448,35 +422,61 @@ app.get('/After-end', (req, res) => {
   res.render('After_end'); // or res.render(...) if using EJS
 });
 
-
-app.post("/After-end", ensureAuthed, upload.single("file"), async (req, res) => {
-   if (!req.session.username) return res.redirect('/');
-  const { reading } = req.body;  
+app.post("/After-end", upload.single("file"), async (req, res) => {
+  if (!req.session.username) return res.redirect('/');
+  const { reading } = req.body;
 
   try {
     const username = req.session.username;
     const vehicleNumber = req.session.vehicleNumber;
-    const photoLink = await uploadFileAndGetLink(req.file);
-   const date = new Date().toLocaleString('en-IN', {
-    day: '2-digit', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', hour12: true
-  });
 
-    // Add row to Google Sheet
+    // ===== Upload photo to MongoDB =====
+    const imageSchema = new mongoose.Schema({
+      img: {
+        data: Buffer,
+        contentType: String
+      }
+    });
+
+    const Image = mongoose.model("AfterEndImage", imageSchema); // persistent model for After-end uploads
+
+    const newImage = new Image({
+      img: {
+        data: req.file.buffer,
+        contentType: req.file.mimetype
+      }
+    });
+
+    const savedImage = await newImage.save();
+
+    // ===== Generate public link =====
+    const baseUrl = req.protocol + "://" + req.get("host");
+    const photoLink = `${baseUrl}/image/${savedImage._id}`;
+
+    // ===== Format current date (Indian style) =====
+    const date = new Date().toLocaleString('en-IN', {
+      day: '2-digit', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+
+    // ===== Add row to Google Sheet =====
     await addToSheet2(reading, photoLink, username, vehicleNumber, date);
 
+    // ===== Show success page with link =====
     res.render("submit_page", {
       message: `✅ File successfully uploaded! <a href="${photoLink}" target="_blank">View Image</a>`,
       backLink: "/",
     });
+
   } catch (err) {
-    console.error("Upload error:", err);
+    console.error("Upload error in /After-end:", err);
+
+    // Clean up temp file if exists
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+
     res.status(500).send("Upload failed. Check server logs.");
   }
 });
-
-
 
 // Total OS Route
 app.get('/Total_os', async (req, res) => {
