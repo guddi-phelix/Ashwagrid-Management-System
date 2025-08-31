@@ -43,13 +43,13 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 
-
-// Routes
-app.get('/', (req, res) => {
+// login  Routes
+app.get('/', noCache,(req, res) => {
 res.render('login', { error: null });
 });
 app.post('/logout', (req, res) => {
   req.session.destroy(() => {
+    res.clearCookie('connect.sid');
     res.redirect('/');
   });
 });
@@ -113,7 +113,7 @@ app.post('/login', async (req, res) => {
     req.session.agdId = agdId;
     req.session.vehicleNumber = driverData.vehicle_number || 'Unknown';
     req.session.profilePhoto = driverData.profile_photo || null;
-   req.session.username = driverData.username|| 'Unknown';
+    req.session.username = driverData.username|| 'Unknown';
     // Get status & format exactly as in sheet (no lowercase)
     const status = driverData.status ? driverData.status.trim() : "";
     const format = driverData.format ? driverData.format.trim() : "";
@@ -214,7 +214,6 @@ app.get('/lease-driver-profile', noCache,(req, res) => {
 
 app.get('/not-leased-profile',(req, res) => {
   if (!req.session.username || req.session.leased) return res.redirect('/');
-
   res.redirect('/driver-profile');
   
 });
