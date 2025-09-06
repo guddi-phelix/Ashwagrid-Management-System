@@ -112,26 +112,31 @@
       }
     }
   </style>
+  <script>window.history.forward();</script>
 </head>
+
 <body>
    
   <form action="/Filling-cng" method="post" enctype="multipart/form-data" autocomplete="off">
-    <h2>CNG Details</h2>
+  <h2>CNG Details</h2>
 
-    <label>CNG quantity (kg):</label>
-    <input type="text" name="cngQty" required>
+  <label>CNG quantity (kg):</label>
+  <input type="text" name="cngQty" required>
 
-    <label>CNG Amount (₹):</label>
-    <input type="number" name="amount" required>
+  <label>CNG Amount (₹):</label>
+  <input type="number" name="amount" required>
 
-    <label>Odometer Reading:</label>
-    <input type="text" name="reading" required>
+  <label>Odometer Reading:</label>
+  <input type="text" name="reading" required>
 
-    <label for="photo">Odometer Photo:</label>
-    <input type="file" name="file" accept="image/*" required />
+  <label for="odometerPhoto">Odometer Photo:</label>
+  <input type="file" name="odometerPhoto" accept="image/*" required />
 
-    <button type="submit">Submit</button>
-  </form>
+  <label for="fillingCngPhoto">Filling CNG Photo:</label>
+  <input type="file" name="fillingCngPhoto" accept="image/*" required />
+
+  <button type="submit">Submit</button>
+</form>
 
   <script>
     window.onload = function () {

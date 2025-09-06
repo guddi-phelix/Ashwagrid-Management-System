@@ -3,9 +3,28 @@
   <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Driver IDs</h2>
 
   <!-- Scrollable container with only vertical scroll -->
-  <div style="max-height: 500px; overflow-y: auto; overflow-x: auto; width: 100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+    <div id="filters" style="display: flex; gap: 10px;">
+      <select id="sortSelect" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+       <option value="">Sort By</option>
+        <option value="agdDesc">AGD ID ↓</option>
+        <option value="agdAsc">AGD ID ↑</optionn>
+        <option value="ageAsc">Age ↑</option>
+        <option value="ageDesc">Age ↓</option>
+      </select>
+    </div>
+
+    <input 
+      type="text" 
+      id="searchInput"
+      placeholder="Search..." 
+      style="padding: 10px; width: 100%; max-width: 300px; border: 1px solid #ccc; border-radius: 6px;"
+    >
+  </div>
+  
+<div style="max-height: 500px; overflow-y: auto; overflow-x: auto; width: 100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
   <table style="min-width: 1600px; border-collapse: collapse;">
-      <thead>
+      <thead style="background-color: #f8b500; color: white;">
         <tr style="background-color: #f8b500; color: white; position: sticky; top: 0; z-index: 2;">
           <th style="padding: 12px; background-color: #f8b500;">UUID</th>
           <th style="padding: 12px; background-color: #f8b500;">AGD ID</th>
@@ -37,7 +56,7 @@
           <th style="padding: 12px; background-color: #f8b500;">Electricity Bill</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="tableBody">
         <% Driver_ids.forEach(driver => { %>
           <tr style="text-align: center; background-color: #fff; border-bottom: 1px solid #ddd;">
             <td style="padding: 12px;"><%= driver.UUID %></td>

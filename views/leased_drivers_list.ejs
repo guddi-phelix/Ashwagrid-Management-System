@@ -1,41 +1,42 @@
 <style>
-  /* Scrollable container */
+  /* page */
+  html, body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    /* allow page to scroll if needed */
+  }
+
+  /* Scrollable container that only grows to content height,
+     but will limit and show scrollbars when content is larger */
   .lease-table-scroll {
     width: 100%;
-    height: calc(100vh - 200px); /* Adjust depending on header/menu height */
-    overflow-y: auto;
-    overflow-x: auto;
+    max-height: calc(100vh - 260px); /* adjust this value to match your header/filters */
+    overflow: auto; /* both vertical & horizontal when needed */
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    padding-bottom: 20px; /* Space so last row isn't glued to bottom */
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px; /* Makes horizontal scroll possible if narrow screen */
+    min-width: 1600px; /* keep same min width as your Daily Accounts table */
   }
 
   thead {
     background-color: #f8b500;
     color: white;
     position: sticky;
-    top: 0; /* Keeps column headings fixed */
+    top: 0;
     z-index: 2;
   }
 
   th, td {
     padding: 12px;
     text-align: center;
+    white-space: nowrap; /* prevents wrapping so horizontal scrollbar appears only when needed */
   }
 
-  html, body {
-    margin: 0;
-    height: 100%;
-    overflow: hidden; /* Prevent page scroll */
-  }
-
-  /* ✅ Profile image style */
+  /* Profile image */
   .driver-photo {
     height: 80px;
     width: 80px;
@@ -43,11 +44,48 @@
     object-fit: cover;
     border: 2px solid #f8b500;
   }
+
+  /* Button */
+  .view-btn {
+    padding: 8px 16px;
+    background-color: #f8b500;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+  }
+  .view-btn:hover { background-color: #d99400; }
+
+  /* removed any custom scrollbar styles so browser default (black/gray) is used */
 </style>
 
-<div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif; height: 100%;">
-    <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Lease Cars</h2>
-    <div style="max-height: 500px; overflow-y: auto; overflow-x: auto; width: 100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+<div id="driverDataContainer" style="padding: 20px; height: 100%;">
+  <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Lease Cars</h2>
+
+  <!-- Filters -->
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+    <div id="filters" style="display:flex; gap:10px;">
+      <select id="sortSelect" style="padding:8px; border:1px solid #ccc; border-radius:6px;">
+        <option value="">Sort By</option>
+        <option value="nameAsc">Username A → Z</option>
+        <option value="nameDesc">Username Z → A</option>
+        <option value="vehicleAsc">Vehicle No ↑</option>
+        <option value="vehicleDesc">Vehicle No ↓</option>
+      </select>
+    </div>
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search..."
+      style="padding:10px; width:100%; max-width:300px; border:1px solid #ccc; border-radius:6px;"
+    >
+  </div>
+
+  <!-- Scroll container (will fit to content and show scrollbars right after rows/cols) -->
+  <div class="lease-table-scroll">
     <table>
       <thead>
         <tr>
@@ -57,14 +95,14 @@
           <th>Profile</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="tableBody">
         <% leasedDrivers.forEach(driver => { %>
-          <tr style="background-color: #fff; border-bottom: 1px solid #ddd;">
+          <tr style="background-color:#fff; border-bottom:1px solid #ddd; text-align:center;">
             <td>
               <% if (driver.photo) { %>
                 <img src="<%= driver.photo %>" alt="Photo" class="driver-photo">
               <% } else { %>
-                <span style="color: gray;">No Photo</span>
+                <span style="color:gray;">No Photo</span>
               <% } %>
             </td>
             <td><%= driver.username %></td>
@@ -72,11 +110,7 @@
             <td>
               <form action="/admin-view-lease-driver-profile" method="GET">
                 <input type="hidden" name="username" value="<%= driver.username %>">
-                <button type="submit" style="padding: 8px 16px; background-color: #f8b500; border: none; color: white; border-radius: 8px; font-weight: 500; cursor: pointer; transition: background-color 0.3s ease; font-family: 'Poppins', sans-serif;" 
-                  onmouseover="this.style.backgroundColor='#d99400'" 
-                  onmouseout="this.style.backgroundColor='#f8b500'">
-                  View Profile
-                </button>
+                <button type="submit" class="view-btn">View Profile</button>
               </form>
             </td>
           </tr>

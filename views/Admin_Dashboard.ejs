@@ -205,11 +205,36 @@ body {
     </div>
 
     <!-- Driver data will appear here -->
-    <div id="driverDataContainer"></div>
+    <div id="driverDataContainer">
+      
+    </div>
   </div>
 
 <script>
 function loadDrivers(type) {
+document.getElementById('driverDataContainer').innerHTML = `
+  <p style="
+    font-size: 32px;
+    font-weight: 800;
+    text-align: center;
+    margin-top: 60px;
+    background: linear-gradient(90deg, #007bff, #00c6ff, #ff6ec7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+    animation: fadeIn 1s ease-in-out;
+  ">
+    Loading data...
+  </p>
+  <style>
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(-15px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+`;
+
+
   let url;
 
   switch(type) {
@@ -232,12 +257,33 @@ function loadDrivers(type) {
       if (type === 'total_os') {
         activateSearchAndSort();
       }
+      if(type === 'lease'){
+        activateSearchAndSort1();
+      }
+      if(type === 'nonlease'){
+        activateSearchAndSort2();
+      }
+      if(type === 'daily_accounts'){
+        activateSearchAndSort3();
+      }
+      if(type === 'weekly_accounts'){
+        activateSearchAndSort4();
+      }
+      if(type === 'driver_ids'){
+        activateSearchAndSort5();
+      }
+      if(type==='Car-history'){
+        activateSearchAndSort6();
+      }
     })
     .catch(err => {
       console.error(err);
       document.getElementById('driverDataContainer').innerHTML = "<p style='color:red;'>Failed to load data.</p>";
     });
 }
+
+
+//total os sort and searching code
 function activateSearchAndSort() {
   console.log("✅ Search + Sort script activated");
 
@@ -317,6 +363,548 @@ function activateSearchAndSort() {
   searchInput.addEventListener("keyup", applyFilters);
   sortSelect.addEventListener("change", applyFilters);
 }
+// lease sorts and searching code
+function activateSearchAndSort1() {
+      console.log("✅ Search + Sort script activated");
+
+      const searchInput = document.getElementById("searchInput");
+      const sortSelect = document.getElementById("sortSelect");
+      const tableBody = document.getElementById("tableBody");
+
+      if (!searchInput || !sortSelect || !tableBody) return;
+
+      // Store rows in memory
+      let allRows = Array.from(tableBody.querySelectorAll("tr")).map(row => ({
+        element: row,
+        username: row.cells[1]?.innerText.trim().toLowerCase(),
+        vehicle: row.cells[2]?.innerText.trim().toLowerCase()
+      }));
+
+      // Highlight helper
+      function highlightText(cell, filter) {
+        if (!filter) return;
+        const text = cell.textContent;
+        const regex = new RegExp(`(${filter})`, "gi");
+        const newHTML = text.replace(regex, `<span style="background: yellow; font-weight: bold;">$1</span>`);
+        cell.innerHTML = newHTML;
+      }
+
+      function renderRows(rows, filter) {
+        tableBody.innerHTML = "";
+        if (rows.length > 0) {
+          rows.forEach(r => {
+            const clonedRow = r.element.cloneNode(true);
+            if (filter) {
+              Array.from(clonedRow.cells).forEach((cell, i) => {
+                if (i > 0 && i < 3) highlightText(cell, filter); // Only Username + Vehicle
+              });
+            }
+            tableBody.appendChild(clonedRow);
+          });
+        } else {
+          let noMatchRow = document.createElement("tr");
+          let td = document.createElement("td");
+          td.colSpan = 4;
+          td.style.textAlign = "center";
+          td.textContent = "No match found";
+          noMatchRow.appendChild(td);
+          tableBody.appendChild(noMatchRow);
+        }
+      }
+
+      function applyFilters() {
+        let filter = searchInput.value.toLowerCase();
+        let sortType = sortSelect.value;
+
+        let filtered = allRows.filter(r =>
+          !filter || r.username.includes(filter) || r.vehicle.includes(filter)
+        );
+
+        // Sorting
+        filtered.sort((a, b) => {
+          if (sortType === "nameAsc") return a.username.localeCompare(b.username);
+          if (sortType === "nameDesc") return b.username.localeCompare(a.username);
+          if (sortType === "vehicleAsc") return a.vehicle.localeCompare(b.vehicle, undefined, { numeric: true });
+          if (sortType === "vehicleDesc") return b.vehicle.localeCompare(a.vehicle, undefined, { numeric: true });
+          return 0;
+        });
+
+        renderRows(filtered, filter);
+      }
+
+      searchInput.addEventListener("keyup", applyFilters);
+      sortSelect.addEventListener("change", applyFilters);
+    }
+
+
+// nonlease sorts and seraching code
+function activateSearchAndSort2() {
+      console.log("✅ Search + Sort script activated");
+
+      const searchInput = document.getElementById("searchInput");
+      const sortSelect = document.getElementById("sortSelect");
+      const tableBody = document.getElementById("tableBody");
+
+      if (!searchInput || !sortSelect || !tableBody) return;
+
+      // Store rows in memory
+      let allRows = Array.from(tableBody.querySelectorAll("tr")).map(row => ({
+        element: row,
+        username: row.cells[1]?.innerText.trim().toLowerCase(),
+        vehicle: row.cells[2]?.innerText.trim().toLowerCase()
+      }));
+
+      // Highlight helper
+      function highlightText(cell, filter) {
+        if (!filter) return;
+        const text = cell.textContent;
+        const regex = new RegExp(`(${filter})`, "gi");
+        const newHTML = text.replace(regex, `<span style="background: yellow; font-weight: bold;">$1</span>`);
+        cell.innerHTML = newHTML;
+      }
+
+      function renderRows(rows, filter) {
+        tableBody.innerHTML = "";
+        if (rows.length > 0) {
+          rows.forEach(r => {
+            const clonedRow = r.element.cloneNode(true);
+            if (filter) {
+              Array.from(clonedRow.cells).forEach((cell, i) => {
+                if (i > 0 && i < 3) highlightText(cell, filter); // Only Username + Vehicle
+              });
+            }
+            tableBody.appendChild(clonedRow);
+          });
+        } else {
+          let noMatchRow = document.createElement("tr");
+          let td = document.createElement("td");
+          td.colSpan = 4;
+          td.style.textAlign = "center";
+          td.textContent = "No match found";
+          noMatchRow.appendChild(td);
+          tableBody.appendChild(noMatchRow);
+        }
+      }
+
+      function applyFilters() {
+        let filter = searchInput.value.toLowerCase();
+        let sortType = sortSelect.value;
+
+        let filtered = allRows.filter(r =>
+          !filter || r.username.includes(filter) || r.vehicle.includes(filter)
+        );
+
+        // Sorting
+        filtered.sort((a, b) => {
+          if (sortType === "nameAsc") return a.username.localeCompare(b.username);
+          if (sortType === "nameDesc") return b.username.localeCompare(a.username);
+          if (sortType === "vehicleAsc") return a.vehicle.localeCompare(b.vehicle, undefined, { numeric: true });
+          if (sortType === "vehicleDesc") return b.vehicle.localeCompare(a.vehicle, undefined, { numeric: true });
+          return 0;
+        });
+
+        renderRows(filtered, filter);
+      }
+
+      searchInput.addEventListener("keyup", applyFilters);
+      sortSelect.addEventListener("change", applyFilters);
+    }
+  
+
+// daily accounts sorts and searching code
+function activateSearchAndSort3() {
+  console.log("✅ Search + Sort script activated for Daily Accounts");
+
+  const searchInput = document.getElementById("searchInput");
+  const sortSelect = document.getElementById("sortSelect");
+  const tableBody = document.getElementById("tableBody");
+
+  if (!searchInput || !sortSelect || !tableBody) return;
+
+  // Store rows in memory
+  let allRows = Array.from(tableBody.querySelectorAll("tr")).map(row => ({
+    element: row,
+    agd: row.cells[0]?.innerText.trim().toLowerCase(),
+    driver: row.cells[1]?.innerText.trim().toLowerCase(),
+    date: row.cells[3]?.innerText.trim()
+  }));
+
+  // Highlight helper
+  function highlightText(cell, filter) {
+    if (!filter) return;
+    const text = cell.textContent;
+    const regex = new RegExp(`(${filter})`, "gi");
+    const newHTML = text.replace(regex, `<span style="background: yellow; font-weight: bold;">$1</span>`);
+    cell.innerHTML = newHTML;
+  }
+
+  function renderRows(rows, filter) {
+    tableBody.innerHTML = "";
+    if (rows.length > 0) {
+      rows.forEach(r => {
+        const clonedRow = r.element.cloneNode(true);
+        if (filter) {
+          Array.from(clonedRow.cells).forEach((cell, i) => {
+            // Highlight AGD ID, Driver Name, and Date only
+            if ([0, 1, 3].includes(i)) highlightText(cell, filter);
+          });
+        }
+        tableBody.appendChild(clonedRow);
+      });
+    } else {
+      let noMatchRow = document.createElement("tr");
+      let td = document.createElement("td");
+      td.colSpan = allRows[0].element.cells.length;
+      td.style.textAlign = "center";
+      td.textContent = "No match found";
+      noMatchRow.appendChild(td);
+      tableBody.appendChild(noMatchRow);
+    }
+  }
+
+ function applyFilters() {
+  let filter = searchInput.value.toLowerCase();
+  let sortType = sortSelect.value;
+
+  let filtered = allRows.filter(r =>
+    !filter ||
+    r.agd.includes(filter) ||
+    r.driver.includes(filter) ||
+    r.date.toLowerCase().includes(filter)
+  );
+
+  // ✅ Custom parser for DD-MM-YYYY
+  function parseDate(dateStr) {
+    if (!dateStr) return new Date(0); // fallback to very old date
+    let [day, month, year] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day); // month is 0-based
+  }
+
+  // Sorting
+  filtered.sort((a, b) => {
+    if (sortType === "agdAsc") return parseInt(a.agd) - parseInt(b.agd);
+    if (sortType === "agdDesc") return parseInt(b.agd) - parseInt(a.agd);
+    if (sortType === "nameAsc") return a.driver.localeCompare(b.driver);
+    if (sortType === "nameDesc") return b.driver.localeCompare(a.driver);
+    if (sortType === "dateAsc") return parseDate(a.date) - parseDate(b.date);
+    if (sortType === "dateDesc") return parseDate(b.date) - parseDate(a.date);
+    return 0;
+  });
+
+  renderRows(filtered, filter);
+}
+
+
+  searchInput.addEventListener("keyup", applyFilters);
+  sortSelect.addEventListener("change", applyFilters);
+}
+
+// weekly account sort and searching code
+
+function activateSearchAndSort4() {
+  console.log("✅ Search + Sort script activated for Weekly Accounts");
+
+  const searchInput = document.getElementById("searchInput");
+  const sortSelect = document.getElementById("sortSelect");
+  const tableBody = document.getElementById("tableBody");
+  const table = document.getElementById("weeklyTable");
+
+  if (!searchInput || !sortSelect || !tableBody || !table) return;
+
+  let allRows = Array.from(tableBody.querySelectorAll("tr"));
+
+  function parseDate(dateStr) {
+    // Accepts both dd-mm-yyyy with or without leading zero
+    if (!dateStr) return null;
+    let parts = dateStr.split("-");
+    if (parts.length !== 3) return null;
+
+    let day = parseInt(parts[0], 10);   // 01 → 1
+    let month = parseInt(parts[1], 10) - 1; // 01 → 0 (JS months are 0-based)
+    let year = parseInt(parts[2], 10);
+
+    if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+    return new Date(year, month, day);
+  }
+
+  function applyFilters() {
+    let filter = searchInput.value.toLowerCase();
+    let sortType = sortSelect.value;
+
+    let filteredRows = allRows.filter(row => {
+      let rowText = row.textContent.toLowerCase();
+
+      // Reset highlights first
+      row.querySelectorAll("td").forEach(td => {
+        td.innerHTML = td.textContent;
+      });
+
+      // Highlight only the matched word(s)
+      if (filter && rowText.includes(filter)) {
+        row.querySelectorAll("td").forEach(td => {
+          let text = td.textContent;
+          td.innerHTML = text.replace(
+            new RegExp(`(${filter})`, "gi"),
+            `<span style="background: yellow; font-weight: bold;">$1</span>`
+          );
+        });
+      }
+
+      return rowText.includes(filter) || !filter;
+    });
+
+    // ✅ Sorting logic
+    filteredRows.sort((a, b) => {
+      let agdA = a.cells[0]?.innerText.trim();
+      let agdB = b.cells[0]?.innerText.trim();
+
+      let numA = parseInt(agdA) || 0;
+      let numB = parseInt(agdB) || 0;
+
+      let nameA = a.cells[1]?.innerText.trim().toLowerCase();
+      let nameB = b.cells[1]?.innerText.trim().toLowerCase();
+
+      let weekStartA = parseDate(a.cells[2]?.innerText.trim());
+      let weekStartB = parseDate(b.cells[2]?.innerText.trim());
+
+      let weekEndA = parseDate(a.cells[3]?.innerText.trim());
+      let weekEndB = parseDate(b.cells[3]?.innerText.trim());
+
+      let cashA = parseFloat(a.cells[4]?.innerText.trim()) || 0;
+      let cashB = parseFloat(b.cells[4]?.innerText.trim()) || 0;
+
+      let loginA = parseFloat(a.cells[5]?.innerText.trim()) || 0;
+      let loginB = parseFloat(b.cells[5]?.innerText.trim()) || 0;
+
+      let tollA = parseFloat(a.cells[6]?.innerText.trim()) || 0;
+      let tollB = parseFloat(b.cells[6]?.innerText.trim()) || 0;
+
+      let cngA = parseFloat(a.cells[7]?.innerText.trim()) || 0;
+      let cngB = parseFloat(b.cells[7]?.innerText.trim()) || 0;
+
+      // ✅ New sorts
+      if (sortType === "weekStartAsc") return weekStartA - weekStartB;
+      if (sortType === "weekStartDesc") return weekStartB - weekStartA;
+      if (sortType === "weekEndAsc") return weekEndA - weekEndB;
+      if (sortType === "weekEndDesc") return weekEndB - weekEndA;
+      if (sortType === "cashAsc") return cashA - cashB;
+      if (sortType === "cashDesc") return cashB - cashA;
+      if (sortType === "loginAsc") return loginA - loginB;
+      if (sortType === "loginDesc") return loginB - loginA;
+      if (sortType === "tollAsc") return tollA - tollB;
+      if (sortType === "tollDesc") return tollB - tollA;
+      if (sortType === "cngAsc") return cngA - cngB;
+      if (sortType === "cngDesc") return cngB - cngA;
+
+      return 0;
+    });
+
+    // Render filtered rows
+    tableBody.innerHTML = "";
+    if (filteredRows.length > 0) {
+      filteredRows.forEach(row => tableBody.appendChild(row));
+    } else {
+      let noMatchRow = document.createElement("tr");
+      let td = document.createElement("td");
+      td.colSpan = allRows[0].cells.length;
+      td.style.textAlign = "center";
+      td.style.color = "black";
+      td.textContent = "No match found";
+      noMatchRow.appendChild(td);
+      tableBody.appendChild(noMatchRow);
+    }
+  }
+
+  searchInput.addEventListener("keyup", applyFilters);
+  sortSelect.addEventListener("change", applyFilters);
+}
+
+
+// driver ids sort and searching codes
+function activateSearchAndSort5() {
+  console.log("✅ Search + Sort script activated for Driver IDs");
+
+  const searchInput = document.getElementById("searchInput");
+  const sortSelect = document.getElementById("sortSelect");
+  const tableBody = document.getElementById("tableBody");
+
+  if (!searchInput || !sortSelect || !tableBody) return;
+
+  let allRows = Array.from(tableBody.querySelectorAll("tr"));
+
+  function applyFilters() {
+    let filter = searchInput.value.toLowerCase();
+    let sortType = sortSelect.value;
+
+    let filteredRows = allRows.filter(row => {
+      let rowText = row.textContent.toLowerCase();
+
+      // Reset highlights
+      row.querySelectorAll("td").forEach(td => {
+        td.innerHTML = td.textContent;
+      });
+
+      // Highlight matches
+      if (filter && rowText.includes(filter)) {
+        row.querySelectorAll("td").forEach(td => {
+          let text = td.textContent;
+          td.innerHTML = text.replace(
+            new RegExp(`(${filter})`, "gi"),
+            `<span style="background: yellow; font-weight: bold;">$1</span>`
+          );
+        });
+      }
+
+      return rowText.includes(filter) || !filter;
+    });
+
+    // ✅ Sorting logic (AGD ID last 2 digits + Age)
+    filteredRows.sort((a, b) => {
+      let agdA = a.cells[3]?.innerText.trim() || "";
+      let agdB = b.cells[3]?.innerText.trim() || "";
+
+      // Extract last 2 digits only (ignores leading zeros)
+      let numA = parseInt(agdA.slice(-2).replace(/^0+/, "")) || 0;
+      let numB = parseInt(agdB.slice(-2).replace(/^0+/, "")) || 0;
+
+      // Age column (index 15)
+      let ageA = parseInt(a.cells[15]?.innerText.trim()) || 0;
+      let ageB = parseInt(b.cells[15]?.innerText.trim()) || 0;
+
+      if (sortType === "agdAsc") return numA - numB;
+      if (sortType === "agdDesc") return numB - numA;
+      if (sortType === "ageAsc") return ageA - ageB;
+      if (sortType === "ageDesc") return ageB - ageA;
+      return 0;
+    });
+
+    // Render
+    tableBody.innerHTML = "";
+    if (filteredRows.length > 0) {
+      filteredRows.forEach(row => tableBody.appendChild(row));
+    } else {
+      let noMatchRow = document.createElement("tr");
+      let td = document.createElement("td");
+      td.colSpan = allRows[0].cells.length;
+      td.style.textAlign = "center";
+      td.textContent = "No match found";
+      noMatchRow.appendChild(td);
+      tableBody.appendChild(noMatchRow);
+    }
+  }
+
+  searchInput.addEventListener("keyup", applyFilters);
+  sortSelect.addEventListener("change", applyFilters);
+}
+
+
+// car history sort and searching code
+function activateSearchAndSort6() {
+  console.log("✅ Search + Sort script activated for Car History");
+
+  const searchInput = document.getElementById("searchInput");
+  const sortSelect = document.getElementById("sortSelect");
+  const tableBody = document.getElementById("tableBody");
+
+  if (!searchInput || !sortSelect || !tableBody) return;
+
+  let allRows = Array.from(tableBody.querySelectorAll("tr"));
+
+  // Parse dates in DD-MM-YYYY or D-M-YYYY formats
+  function parseDate(dateStr) {
+    if (!dateStr) return new Date(0);
+    const parts = dateStr.trim().split("-");
+    if (parts.length !== 3) return new Date(0);
+
+    let day, month, year;
+
+    if (parts[2].length === 4) { // DD-MM-YYYY
+      day = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10) - 1;
+      year = parseInt(parts[2], 10);
+    } else if (parts[0].length === 2) { // YY-MM-DD
+      year = 2000 + parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10) - 1;
+      day = parseInt(parts[2], 10);
+    } else {
+      return new Date(0);
+    }
+
+    return new Date(year, month, day);
+  }
+
+  function applyFilters() {
+    const filter = searchInput.value.toLowerCase();
+    const sortType = sortSelect.value;
+
+    let filteredRows = allRows.filter(row => {
+      const rowText = row.textContent.toLowerCase();
+
+      // Reset highlights only in text cells (preserve images)
+      row.querySelectorAll("td").forEach(td => {
+        if (!td.querySelector("img")) td.innerHTML = td.textContent;
+      });
+
+      // Highlight matches only in text cells
+      if (filter && rowText.includes(filter)) {
+        row.querySelectorAll("td").forEach(td => {
+          if (!td.querySelector("img")) {
+            td.innerHTML = td.textContent.replace(
+              new RegExp(`(${filter})`, "gi"),
+              `<span style="background: yellow; font-weight: bold;">$1</span>`
+            );
+          }
+        });
+      }
+
+      return rowText.includes(filter) || !filter;
+    });
+
+    // Sorting logic
+    filteredRows.sort((a, b) => {
+      const nameA = a.cells[5]?.innerText.trim().toLowerCase() || "";
+      const nameB = b.cells[5]?.innerText.trim().toLowerCase() || "";
+
+      const dateFromA = parseDate(a.cells[7]?.innerText.trim());
+      const dateFromB = parseDate(b.cells[7]?.innerText.trim());
+
+      const dateToA = parseDate(a.cells[8]?.innerText.trim());
+      const dateToB = parseDate(b.cells[8]?.innerText.trim());
+
+      switch (sortType) {
+        case "nameAsc": return nameA.localeCompare(nameB);
+        case "nameDesc": return nameB.localeCompare(nameA);
+        case "dateFromAsc": return dateFromA - dateFromB;
+        case "dateFromDesc": return dateFromB - dateFromA;
+        case "dateToAsc": return dateToA - dateToB;
+        case "dateToDesc": return dateToB - dateToA;
+        default: return 0;
+      }
+    });
+
+    // Render filtered rows
+    tableBody.innerHTML = "";
+    if (filteredRows.length > 0) {
+      filteredRows.forEach(row => tableBody.appendChild(row));
+    } else {
+      const noMatchRow = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = allRows[0].cells.length;
+      td.style.textAlign = "center";
+      td.textContent = "No match found";
+      noMatchRow.appendChild(td);
+      tableBody.appendChild(noMatchRow);
+    }
+
+    // Scroll first highlighted row to top
+    const firstHighlight = tableBody.querySelector("span[style*='background: yellow']");
+    if (firstHighlight) firstHighlight.closest("tr").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  searchInput.addEventListener("keyup", applyFilters);
+  sortSelect.addEventListener("change", applyFilters);
+}
+
 
 </script>
 <script>
@@ -326,6 +914,17 @@ function activateSearchAndSort() {
       window.location.reload();
     }
   });
+</script>
+<script>
+  // Auto-load section based on query param
+window.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const loadType = urlParams.get('load'); // e.g., "lease"
+
+  if (loadType) {
+    loadDrivers(loadType); // triggers your existing function
+  }
+});
 </script>
 
 </body>

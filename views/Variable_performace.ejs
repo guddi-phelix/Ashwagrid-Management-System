@@ -88,53 +88,37 @@
     <% if (driverData && driverData.length > 0) { %>
       <% driverData.forEach(record => { %>
         <div class="record">
-          <div class="date-range"><%= record.Date_from %> TO <%= record.Date_to %></div>
+     
           <div class="car-number"><%= record.Car_number %></div>
-          <div class="due-amount">Due Amount: <%= record.Due_amount %></div>
+          <div class="due-amount">AGD ID: <%= record.AGD_ID%></div>
 
           <div class="field-row">
-            <div class="field-name">Uber Trips</div>
-            <div class="field-value"><%= record.Uber_trips %></div>
+            <div class="field-name">Utilization</div>
+            <div class="field-value"><%= record.Utilization %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">ATrips per hour</div>
+            <div class="field-value"><%= record.Trips_per_hour %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Hours Online</div>
+            <div class="field-value"><%= record.Hours_Online%></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Hours on Trip</div>
+            <div class="field-value negative"><%= record.Hours_on_Trip %></div>
+          </div>
+          <div class="field-row">
+            <div class="field-name">Trips Taken</div>
+            <div class="field-value positive"><%= record.Trips_Taken %></div>
           </div>
           <div class="field-row">
             <div class="field-name">Acceptance Rate</div>
-            <div class="field-value"><%= record.Acceptance_rate %></div>
+            <div class="field-value neutral"><%= record.Acceptance_Rate %></div>
           </div>
           <div class="field-row">
-            <div class="field-name">Cancellation Rate</div>
-            <div class="field-value"><%= record.Cancellation_rate %></div>
-          </div>
-          <div class="field-row">
-            <div class="field-name">Total Lease</div>
-            <div class="field-value negative"><%= record.Total_lease %></div>
-          </div>
-          <div class="field-row">
-            <div class="field-name">Total Earning</div>
-            <div class="field-value positive"><%= record.Total_earning %></div>
-          </div>
-          <div class="field-row">
-            <div class="field-name">Total Toll</div>
-            <div class="field-value neutral"><%= record.Total_toll %></div>
-          </div>
-          <div class="field-row">
-            <div class="field-name">Company Penalty</div>
-            <div class="field-value negative"><%= record.Comapany_penality %></div>
-          </div>
-          <div class="field-row">
-            <div class="field-name">RTO Fine</div>
-            <div class="field-value negative"><%= record.RTO_fine %></div>
-          </div>
-          <div class="field-row">
-            <div class="field-name">TDS</div>
-            <div class="field-value negative"><%= record.TDS %></div>
-          </div>
-          <div class="field-row">
-            <div class="field-name">Adjustment</div>
-            <div class="field-value neutral"><%= record.Adjustment %></div>
-          </div>
-          <div class="field-row">
-            <div class="field-name">Payment Made</div>
-            <div class="field-value positive"><%= record.Payment_made %></div>
+            <div class="field-name">Updated At</div>
+            <div class="field-value negative"><%= record.Updated_At %></div>
           </div>
         </div>
       <% }) %>

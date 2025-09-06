@@ -1,17 +1,50 @@
 <!-- Lease Driver List -->
 <div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif;">
-  <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Weekly_accounts</h2>
+  <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Weekly Accounts</h2>
+  
+  <!-- Filters row -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+    
+    <!-- Left: Sort dropdown -->
+    <div>
+      <select id="sortSelect" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+        <option value="">Sort By</option>
+        <option value="weekStartAsc">Week Start ↑</option>
+        <option value="weekStartDesc">Week Start ↓</option>
+        <option value="weekEndAsc">Week End ↑</option>
+        <option value="weekEndDesc">Week End ↓</option>
+        <option value="cashAsc">Cash Collection ↑</option>
+        <option value="cashDesc">Cash Collection ↓</option>
+        <option value="loginAsc">Login Hours ↑</option>
+        <option value="loginDesc">Login Hours ↓</option>
+        <option value="tollAsc">Toll ↑</option>
+        <option value="tollDesc">Toll ↓</option>
+        <option value="cngAsc">CNG ↑</option>
+        <option value="cngDesc">CNG ↓</option>
+      </select>
+    </div>
 
-  <!-- Scrollable container -->
-<div style="max-height: 500px; overflow-y: auto; overflow-x: auto; width: 100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-  <table style="min-width: 1600px; border-collapse: collapse;">
+    <!-- Right: Search bar -->
+    <div>
+      <input 
+        type="text" 
+        id="searchInput"
+        placeholder="Search..." 
+        style="padding: 10px; width: 250px; border: 1px solid #ccc; border-radius: 6px;"
+      >
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div style="max-height: 500px; overflow-y: auto; overflow-x: auto; width: 100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+    <table style="min-width: 1600px; border-collapse: collapse;" id="weeklyTable">
       <thead style="background-color: #f8b500; color: white;">
         <tr>
           <th style="padding: 12px;">Driver ID</th>
           <th style="padding: 12px;">Assigned Car</th>
           <th style="padding: 12px;">Week Start</th>
           <th style="padding: 12px;">Week End</th>
-          <th style="padding: 12px;">CAsh Collection</th>
+          <th style="padding: 12px;">Cash Collection</th>
           <th style="padding: 12px;">Login Hours</th>
           <th style="padding: 12px;">Toll</th>
           <th style="padding: 12px;">CNG (paid by driver)</th>
@@ -19,17 +52,16 @@
           <th style="padding: 12px;">Adjustment</th>
           <th style="padding: 12px;">Final Amount</th>
           <th style="padding: 12px;">Status</th>
-      
         </tr>
       </thead>
-      <tbody>
+      <tbody id="tableBody">
         <% Weekly_accounts.forEach(driver => { %>
           <tr style="text-align: center; background-color: #fff; border-bottom: 1px solid #ddd;">
             <td style="padding: 12px;"><%= driver.Driver_ID %></td>
             <td style="padding: 12px;"><%= driver.Assigned_Car %></td>
             <td style="padding: 12px;"><%= driver.Week_Start %></td>
-             <td style="padding: 12px;"><%= driver.Week_End %></td>
-                <td style="padding: 12px;"><%= driver.Cash_Collection %></td>
+            <td style="padding: 12px;"><%= driver.Week_End %></td>
+            <td style="padding: 12px;"><%= driver.Cash_Collection %></td>
             <td style="padding: 12px;"><%= driver.Login_hours %></td>
             <td style="padding: 12px;"><%= driver.Toll %></td>
             <td style="padding: 12px;"><%= driver.CNG %></td>

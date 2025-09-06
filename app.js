@@ -169,9 +169,10 @@ app.post('/admin', async (req, res) => {
         }
 
         // Call Apps Script API
-        const url = `https://script.google.com/macros/s/AKfycbwvRTpJoTt0RDvpECOPz1-eFxbMXP_bKfrbB2aT-eMXhIb9aomuTY7aTjcrRu42bjiW/exec?token=${SECRET_TOKEN}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+        const url = `https://script.google.com/macros/s/AKfycbxbFKmFnoo2D4KVizV8I_276tQ67NvcPn7ofQjV51jjC6BYm5XiGvQMgNnet395rCPR/exec?token=${SECRET_TOKEN}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
         const response = await fetch(url);
         const data = await response.json();
+        console.log(data);
 
         if (data.success) {
            req.session.admin = admin;
@@ -265,7 +266,9 @@ const doc3 = new GoogleSpreadsheet('1055AaVuJbiex-F-xxNXjPvCRCcG2ZgBeEAN5aLseZuU
 const doc5 = new GoogleSpreadsheet('1BjaACtElpoediYDcMZ1DJPX8G4bZKa6KYMbjB6mPUpw', jwtClient); //total os
 const doc6 = new GoogleSpreadsheet('1QCP9Hj4Hc1EkZeFdSZeHOnot5bzCEH0MC_o3p7sSuiE', jwtClient);//daily accounts
 const doc7 = new GoogleSpreadsheet('11w-Oc5Dc27kX5B67_VztGfJUafkfiDcVLo_NA3az5qU', jwtClient);//driver ids
-const doc8 = new GoogleSpreadsheet('1qZY44oiGylNUUCspqH7d7PWInKxZvNtmvLPWiAzsMdo', jwtClient);
+const doc8 = new GoogleSpreadsheet('1qZY44oiGylNUUCspqH7d7PWInKxZvNtmvLPWiAzsMdo', jwtClient);//variable performance
+
+const doc9 = new GoogleSpreadsheet('1yyZwIJVLdl4Airi2kI2Gj4N7vafUUcxfj7ExYhBdorA', jwtClient);//weekly account
 
 async function addToSheet(reading, photoLink, username, vehicleNumber, date) {
   await doc.loadInfo(); // load spreadsheet info
@@ -280,7 +283,7 @@ async function addToSheet(reading, photoLink, username, vehicleNumber, date) {
   console.log("✅ Row added to sheet");
 }
 
-async function addToSheet1(cngQty, photoLink, username, vehicleNumber, date,reading,amount) {
+async function addToSheet1(cngQty, odometerLink, fillingLink, username, vehicleNumber, date, reading, amount) {
   await doc1.loadInfo();
   const sheet = doc1.sheetsByIndex[0];
   await sheet.addRow({
@@ -290,7 +293,9 @@ async function addToSheet1(cngQty, photoLink, username, vehicleNumber, date,read
       CNG_Quantity_KG: cngQty,
       Amount_Rs: amount,
       OdometerReading: reading,
-      Photo: photoLink
+      odometer_photo: odometerLink,
+      filling_cng_photo:fillingLink
+
   });
   console.log('✅ Row added to sheet');
 }
@@ -354,61 +359,53 @@ app.post("/before_start", upload.single("file"), async (req, res) => {
 });
 
 
-app.get('/submit-page', (req, res) => {
+app.get('/submit-page',(req, res) => {
    if (!req.session.username) {
     return res.redirect('/'); }
-  res.render('submit_page'); // or res.render(...) if using EJS
+  res.render('submit_page'); // 
 });
-app.post("/Filling-cng", upload.single("file"), async (req, res) => {
-  if (!req.session.username) return res.redirect("/");
 
+
+
+app.post("/Filling-cng", upload.fields([
+  { name: "odometerPhoto", maxCount: 1 },
+  { name: "fillingCngPhoto", maxCount: 1 }
+]), async (req, res) => {
   try {
+    const { cngQty, amount, reading } = req.body;
     const username = req.session.username;
     const vehicleNumber = req.session.vehicleNumber;
-    const { cngQty, amount, reading } = req.body;
-
-    // ===== Upload photo to MongoDB =====
-    const newImage = new Image({
-      img: {
-        data: req.file.buffer,
-        contentType: req.file.mimetype
-      }
+  // adjust
+   const date = new Date().toLocaleString('en-IN', {
+      day: '2-digit', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
     });
 
-    const savedImage = await newImage.save();
+    const odometerFile = req.files["odometerPhoto"][0];
+    const cngFile = req.files["fillingCngPhoto"][0];
 
-    // ===== Generate public link =====
-    const baseUrl = req.protocol + "://" + req.get("host");
-    const photoLink = `${baseUrl}/image/${savedImage._id}`;
+    // Save images in MongoDB
+    const odometerImage = new Image({ img: { data: odometerFile.buffer, contentType: odometerFile.mimetype } });
+    const savedOdometer = await odometerImage.save();
 
-    // ===== Format current date (Indian style) =====
-    const date = new Date().toLocaleString("en-IN", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    const cngImage = new Image({ img: { data: cngFile.buffer, contentType: cngFile.mimetype } });
+    const savedCng = await cngImage.save();
 
-    // ===== Save record to Google Sheet =====
-    await addToSheet1(cngQty, photoLink, username, vehicleNumber, date, reading, amount);
+    const odometerLink = `${req.protocol}://${req.get("host")}/image/${savedOdometer._id}`;
+    const cngLink = `${req.protocol}://${req.get("host")}/image/${savedCng._id}`;
 
-    // ===== Show success page with link =====
-    res.render("submit_page", {
-      message: `✅ CNG filling record saved! <a href="${photoLink}" target="_blank">View Image</a>`,
-      backLink: "/",
-    });
+    // Save to Google Sheet
+    await addToSheet1(cngQty, odometerLink, cngLink, username, vehicleNumber, date, reading, amount);
+
+    // Render success page
+     res.redirect("submit-page");
 
   } catch (err) {
-    console.error("Upload error in /Filling-cng:", err);
-
-    // Clean up temp file if exists
-    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-
-    res.status(500).send("❌ Failed to save CNG record. Check server logs.");
+    console.error(err);
+    res.status(500).send("❌ Failed to save CNG record.");
   }
 });
+
 
 
 
@@ -542,25 +539,25 @@ app.get('/Weekly_accounts', async (req, res) => {
    if (!req.session.admin) {
     return res.redirect('/'); }
   try {
-    await doc6.loadInfo();
-    const sheet = doc6.sheetsByIndex[0];
+    await doc9.loadInfo();
+    const sheet = doc9.sheetsByIndex[0];
     await sheet.loadHeaderRow(1);
 
     const rows = await sheet.getRows();
 
     const Weekly_accounts = rows.map(row => ({
       Driver_ID:row._rawData[0],
-      Assigned_Car: row._rawData[2],
-      Week_Start:row._rawData[3],
+      Assigned_Car: row._rawData[1],
+      Week_Start:row._rawData[2],
       Week_End:row._rawData[3],
       Cash_Collection:row._rawData[4],
       Login_hours:row._rawData[5],
       Toll:row._rawData[6],
       CNG: row._rawData[7],
       Driver_salary:row._rawData[8],
-      Adjustment:row._rawData[10],
-      Final_amt:row._rawData[11],
-      Status:row._rawData[12],
+      Adjustment:row._rawData[9],
+      Final_amt:row._rawData[10],
+      Status:row._rawData[11],
     
     }));
     console.log(Weekly_accounts)
@@ -856,23 +853,17 @@ app.get('/variable-performance', async (req, res) => {
     
     // Filter only the data of this user
     const driverData = rows
-      .filter(row => row._rawData[2] === vehicleNumber) // Driver_Name in index 1
+      .filter(row => row._rawData[1] === vehicleNumber) // Driver_Name in index 1
       .map(row => ({
-        Date_from: row._rawData[0],
-        Date_to: row._rawData[1],
-        Car_number: row._rawData[2],
-        Due_amount: row._rawData[3],
-        Uber_trips: row._rawData[4],
-        Acceptance_rate: row._rawData[5],
-        Cancellation_rate: row._rawData[6],
-        Total_lease: row._rawData[7],
-        Total_earning: row._rawData[8],
-        Total_toll: row._rawData[9],
-        Comapany_penality: row._rawData[10],
-        RTO_fine: row._rawData[11],
-        TDS: row._rawData[12],
-        Adjustment: row._rawData[13],
-        Payment_made: row._rawData[14],
+        AGD_ID: row._rawData[0],
+        Car_number: row._rawData[1],
+        Utilization: row._rawData[2],
+        Trips_per_hour: row._rawData[3],
+        Hours_Online: row._rawData[4],
+        Hours_on_Trip: row._rawData[5],
+        Trips_Taken: row._rawData[6],
+        Acceptance_Rate: row._rawData[7],
+        Updated_At: row._rawData[8],
       }));
     console.log("data:",driverData)
     res.render('Variable_performace', { driverData, layout: false });

@@ -1,7 +1,45 @@
-<!-- Only HTML here -->
+<style>
+  /* page */
+  html, body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* ✅ Reusable scrollable container */
+  .lease-table-scroll {
+    width: 100%;
+    max-height: calc(100vh - 260px); /* adjust for header/filters */
+    overflow: auto; /* shows vertical & horizontal scrollbars when needed */
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1600px; /* same as Non-Lease for consistency */
+  }
+
+  thead {
+    background-color: #f8b500;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  th, td {
+    padding: 12px;
+    text-align: center;
+    white-space: nowrap; /* prevents wrapping → forces horizontal scrollbar if needed */
+    border-bottom: 1px solid #ddd;
+  }
+</style>
+
 <div id="totalOsContainer" style="padding: 20px; font-family: 'Poppins', sans-serif;">
   <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Total OS</h2>
 
+  <!-- Filters -->
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
     <div id="filters" style="display: flex; gap: 10px;">
       <select id="sortSelect" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
@@ -15,36 +53,40 @@
 
     <input 
       type="text" 
-      id="searchInput" 
+      id="searchInput"
       placeholder="Search..." 
       style="padding: 10px; width: 100%; max-width: 300px; border: 1px solid #ccc; border-radius: 6px;"
+  
     >
   </div>
 
-  <table style="width: 100%; border-collapse: collapse; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
-    <thead style="background-color: #f8b500; color: white;">
-      <tr>
-        <th style="padding: 12px;">WhatsApp Number</th>
-        <th style="padding: 12px;">Uber Registered Number</th>
-        <th style="padding: 12px;">Name</th>
-        <th style="padding: 12px;">AGD ID</th>
-        <th style="padding: 12px;">Weekly OS</th>
-        <th style="padding: 12px;">Daily Hisaab</th>
-        <th style="padding: 12px;">Total OS</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody" style="background-color:white;color: black;">
-      <% totalos.forEach(driver => { %>
+  <!-- ✅ Scrollable Table -->
+  <div class="lease-table-scroll">
+    <table>
+      <thead>
         <tr>
-          <td><%= driver.WhatsApp_Number %></td>
-          <td><%= driver.Uber_Registered_Number %></td>
-          <td><%= driver.Name %></td>
-          <td><%= driver.AGD_ID %></td>
-          <td><%= driver.Weekly_OS %></td>
-          <td><%= driver.Daily_Hisaab %></td>
-          <td><%= driver.Total_OS %></td>
+          <th>WhatsApp Number</th>
+          <th>Uber Registered Number</th>
+          <th>Name</th>
+          <th>AGD ID</th>
+          <th>Weekly OS</th>
+          <th>Daily Hisaab</th>
+          <th>Total OS</th>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody id="tableBody" style="background-color:white;color: black;">
+        <% totalos.forEach(driver => { %>
+          <tr>
+            <td><%= driver.WhatsApp_Number %></td>
+            <td><%= driver.Uber_Registered_Number %></td>
+            <td><%= driver.Name %></td>
+            <td><%= driver.AGD_ID %></td>
+            <td><%= driver.Weekly_OS %></td>
+            <td><%= driver.Daily_Hisaab %></td>
+            <td><%= driver.Total_OS %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
 </div>
