@@ -75,18 +75,27 @@
         </tr>
       </thead>
       <tbody id="tableBody" style="background-color:white;color: black;">
-        <% totalos.forEach(driver => { %>
-          <tr>
-            <td><%= driver.WhatsApp_Number %></td>
-            <td><%= driver.Uber_Registered_Number %></td>
-            <td><%= driver.Name %></td>
-            <td><%= driver.AGD_ID %></td>
-            <td><%= driver.Weekly_OS %></td>
-            <td><%= driver.Daily_Hisaab %></td>
-            <td><%= driver.Total_OS %></td>
-          </tr>
-        <% }) %>
-      </tbody>
+  <% if (totalos && totalos.length > 0) { %>
+    <% totalos.forEach(driver => { %>
+      <tr>
+        <td><%= driver.WhatsApp_Number %></td>
+        <td><%= driver.Uber_Registered_Number %></td>
+        <td><%= driver.Name %></td>
+        <td><%= driver.AGD_ID %></td>
+        <td><%= driver.Weekly_OS %></td>
+        <td><%= driver.Daily_Hisaab %></td>
+        <td><%= driver.Total_OS %></td>
+      </tr>
+    <% }) %>
+  <% } else { %>
+    <tr>
+      <td colspan="7" style="text-align:center; padding: 20px; color: #666; font-weight: bold;">
+        No data available!
+      </td>
+    </tr>
+  <% } %>
+</tbody>
+
     </table>
   </div>
 </div>

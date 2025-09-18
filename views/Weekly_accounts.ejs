@@ -1,10 +1,9 @@
-<!-- Lease Driver List -->
-<div id="driverDataContainer" style="padding: 20px; font-family: 'Poppins', sans-serif;">
+<!-- Weekly Accounts -->
+<div id="weeklyAccountsContainer" style="padding: 20px; font-family: 'Poppins', sans-serif;">
   <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Weekly Accounts</h2>
   
   <!-- Filters row -->
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-    
     <!-- Left: Sort dropdown -->
     <div>
       <select id="sortSelect" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
@@ -35,42 +34,50 @@
     </div>
   </div>
 
-  <!-- Table -->
+  <!-- Scrollable Table -->
   <div style="max-height: 500px; overflow-y: auto; overflow-x: auto; width: 100%; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-    <table style="min-width: 1600px; border-collapse: collapse;" id="weeklyTable">
+    <table style="min-width: 1600px; border-collapse: collapse; width: 100%; border: 1px solid #ddd;" id="weeklyTable">
       <thead style="background-color: #f8b500; color: white;">
-        <tr>
-          <th style="padding: 12px;">Driver ID</th>
-          <th style="padding: 12px;">Assigned Car</th>
-          <th style="padding: 12px;">Week Start</th>
-          <th style="padding: 12px;">Week End</th>
-          <th style="padding: 12px;">Cash Collection</th>
-          <th style="padding: 12px;">Login Hours</th>
-          <th style="padding: 12px;">Toll</th>
-          <th style="padding: 12px;">CNG (paid by driver)</th>
-          <th style="padding: 12px;">Driver Salary</th>
-          <th style="padding: 12px;">Adjustment</th>
-          <th style="padding: 12px;">Final Amount</th>
-          <th style="padding: 12px;">Status</th>
+        <tr style="background-color: #f8b500; color: white; position: sticky; top: 0; z-index: 2;">
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Driver ID</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Assigned Car</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Week Start</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Week End</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Cash Collection</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Login Hours</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Toll</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">CNG (paid by driver)</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Driver Salary</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Adjustment</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Final Amount</th>
+          <th style="padding: 14px 18px; border: 1px solid #ddd;">Status</th>
         </tr>
       </thead>
       <tbody id="tableBody">
-        <% Weekly_accounts.forEach(driver => { %>
-          <tr style="text-align: center; background-color: #fff; border-bottom: 1px solid #ddd;">
-            <td style="padding: 12px;"><%= driver.Driver_ID %></td>
-            <td style="padding: 12px;"><%= driver.Assigned_Car %></td>
-            <td style="padding: 12px;"><%= driver.Week_Start %></td>
-            <td style="padding: 12px;"><%= driver.Week_End %></td>
-            <td style="padding: 12px;"><%= driver.Cash_Collection %></td>
-            <td style="padding: 12px;"><%= driver.Login_hours %></td>
-            <td style="padding: 12px;"><%= driver.Toll %></td>
-            <td style="padding: 12px;"><%= driver.CNG %></td>
-            <td style="padding: 12px;"><%= driver.Driver_salary %></td>
-            <td style="padding: 12px;"><%= driver.Adjustment %></td>
-            <td style="padding: 12px;"><%= driver.Final_amt %></td>
-            <td style="padding: 12px;"><%= driver.Status %></td>
+        <% if (Weekly_accounts && Weekly_accounts.length > 0) { %>
+          <% Weekly_accounts.forEach(driver => { %>
+            <tr style="text-align:center; background-color:#fff; border-bottom:1px solid #ddd;">
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Driver_ID %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Assigned_Car %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Week_Start %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Week_End %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Cash_Collection %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Login_hours %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Toll %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.CNG %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Driver_salary %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Adjustment %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Final_amt %></td>
+              <td style="padding: 14px 18px; border: 1px solid #ddd;"><%= driver.Status %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="12" style="text-align:center; padding: 20px; color:#666; font-weight:bold; background-color:#f9f9f9;">
+              No data available!
+            </td>
           </tr>
-        <% }) %>
+        <% } %>
       </tbody>
     </table>
   </div>

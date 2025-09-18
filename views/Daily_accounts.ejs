@@ -81,27 +81,36 @@
         </tr>
       </thead>
      <tbody id="tableBody" style="background-color:white;color: black;">
-        <% Daily_accounts.forEach(driver => { %>
-          <tr>
-            <td><%= driver.AGD_ID %></td>
-            <td><%= driver.Driver_Name %></td>
-            <td><%= driver.Assigned_Car %></td>
-            <td><%= driver.Date %></td>
-            <td><%= driver.Cash_Collection %></td>
-            <td><%= driver.Login_hours %></td>
-            <td><%= driver.Toll %></td>
-            <td><%= driver.CNG %></td>
-            <td><%= driver.Driver_salary %></td>
-            <td><%= driver.RTO %></td>
-            <td><%= driver.Adjustment %></td>
-            <td><%= driver.payable_amt %></td>
-            <td><%= driver.Paid_amt %></td>
-            <td><%= driver.Rent %></td>
-            <td><%= driver.Rent_to_deposit%></td>
-            <td><%= driver.deposit_to_rent%></td>
-          </tr>
-        <% }) %>
-      </tbody>
+  <% if (Daily_accounts && Daily_accounts.length > 0) { %>
+    <% Daily_accounts.forEach(driver => { %>
+      <tr>
+        <td><%= driver.AGD_ID %></td>
+        <td><%= driver.Driver_Name %></td>
+        <td><%= driver.Assigned_Car %></td>
+        <td><%= driver.Date %></td>
+        <td><%= driver.Cash_Collection %></td>
+        <td><%= driver.Login_hours %></td>
+        <td><%= driver.Toll %></td>
+        <td><%= driver.CNG %></td>
+        <td><%= driver.Driver_salary %></td>
+        <td><%= driver.RTO %></td>
+        <td><%= driver.Adjustment %></td>
+        <td><%= driver.payable_amt %></td>
+        <td><%= driver.Paid_amt %></td>
+        <td><%= driver.Rent %></td>
+        <td><%= driver.Rent_to_deposit %></td>
+        <td><%= driver.deposit_to_rent %></td>
+      </tr>
+    <% }) %>
+  <% } else { %>
+    <tr>
+      <td colspan="16" style="text-align:center; padding: 20px; color: #666; font-weight: bold; background-color:#f9f9f9;">
+        No data available!
+      </td>
+    </tr>
+  <% } %>
+</tbody>
+
     </table>
   </div>
 </div>

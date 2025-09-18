@@ -96,26 +96,35 @@
         </tr>
       </thead>
       <tbody id="tableBody">
-        <% leasedDrivers.forEach(driver => { %>
-          <tr style="background-color:#fff; border-bottom:1px solid #ddd; text-align:center;">
-            <td>
-              <% if (driver.photo) { %>
-                <img src="<%= driver.photo %>" alt="Photo" class="driver-photo">
-              <% } else { %>
-                <span style="color:gray;">No Photo</span>
-              <% } %>
-            </td>
-            <td><%= driver.username %></td>
-            <td><%= driver.vehicle %></td>
-            <td>
-              <form action="/admin-view-lease-driver-profile" method="GET">
-                <input type="hidden" name="username" value="<%= driver.username %>">
-                <button type="submit" class="view-btn">View Profile</button>
-              </form>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
+  <% if (leasedDrivers && leasedDrivers.length > 0) { %>
+    <% leasedDrivers.forEach(driver => { %>
+      <tr style="background-color:#fff; border-bottom:1px solid #ddd; text-align:center;">
+        <td>
+          <% if (driver.photo) { %>
+            <img src="<%= driver.photo %>" alt="Photo" class="driver-photo">
+          <% } else { %>
+            <span style="color:gray;">No Photo</span>
+          <% } %>
+        </td>
+        <td><%= driver.username %></td>
+        <td><%= driver.vehicle %></td>
+        <td>
+          <form action="/admin-view-lease-driver-profile" method="GET">
+            <input type="hidden" name="username" value="<%= driver.username %>">
+            <button type="submit" class="view-btn">View Profile</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  <% } else { %>
+    <tr>
+      <td colspan="4" style="text-align:center; padding:20px; color:#666; font-weight:bold;">
+        No data available!
+      </td>
+    </tr>
+  <% } %>
+</tbody>
+
     </table>
   </div>
 </div>

@@ -10,14 +10,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     flex-wrap: wrap;
     gap: 10px;
   }
 
   .controls select, .controls input {
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid #ccc;
     font-size: 14px;
   }
@@ -25,7 +25,7 @@
   /* Scrollable table container */
   .lease-table-scroll {
     width: 100%;
-    max-height: calc(100vh - 260px); /* adjust to fit header/filters */
+    max-height: 500px;
     overflow: auto; /* both vertical & horizontal */
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -34,7 +34,7 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 1600px; /* keeps same min-width as before */
+    min-width: 1600px;
   }
 
   thead {
@@ -46,57 +46,47 @@
   }
 
   th, td {
-    padding: 12px;
+    padding: 14px 18px;
     text-align: center;
-    white-space: nowrap; /* prevents text wrap */
+    border: 1px solid #ddd;
+    white-space: nowrap;
   }
 
-  /* Highlighted row */
-  .highlight {
-    background-color: #fffae6 !important;
+  tbody tr {
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+  }
+
+  tbody tr:hover {
+    background-color: #fffae6;
   }
 
   /* Profile image */
   .driver-photo {
-    height: 80px;
-    width: 80px;
+    height: 60px;
+    width: 60px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #f8b500;
   }
-
-  /* Button (optional for view profile) */
-  .view-btn {
-    padding: 8px 16px;
-    background-color: #f8b500;
-    border: none;
-    color: white;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .view-btn:hover { background-color: #d99400; }
 </style>
-<div id="driverDataContainer" style="padding: 20px; height: 100%;">
+
+<div id="driverDataContainer" style="padding: 20px;">
   <h2 style="text-align: left; margin-bottom: 20px; color: #333;">Car History</h2>
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-    <div id="filters" style="display:flex; gap:10px;">
-      <select id="sortSelect" style="padding:8px; border:1px solid #ccc; border-radius:6px;">
-        <option value="">Sort By</option>
-        <option value="nameAsc">Username A → Z</option>
-        <option value="nameDesc">Username Z → A</option>
-        <option value="vehicleAsc">Vehicle No ↑</option>
-        <option value="vehicleDesc">Vehicle No ↓</option>
-      </select>
-    </div>
- <input
-      type="text"
-      id="searchInput"
-      placeholder="Search..."
-      style="padding:10px; width:100%; max-width:300px; border:1px solid #ccc; border-radius:6px;"
-    >
-    </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <select id="sortSelect">
+      <option value="">Sort By</option>
+      <option value="nameAsc">Username A → Z</option>
+      <option value="nameDesc">Username Z → A</option>
+      <option value="vehicleAsc">Vehicle No ↑</option>
+      <option value="vehicleDesc">Vehicle No ↓</option>
+    </select>
+
+    <input type="text" id="searchInput" placeholder="Search...">
+  </div>
+
   <!-- Scrollable table container -->
   <div class="lease-table-scroll">
     <table>
@@ -115,28 +105,36 @@
           <th>UUID</th>
         </tr>
       </thead>
-      <tbody id="tableBody">
-        <% Car_History.forEach(driver => { %>
-          <tr style="background-color:#fff; border-bottom:1px solid #ddd;">
-            <td>
-              <% if (driver.photo) { %>
-                <img src="<%= driver.photo %>" alt="Photo" class="driver-photo">
-              <% } else { %>
-                <span style="color:gray;">No Photo</span>
-              <% } %>
+      <tbody>
+        <% if (Car_History && Car_History.length > 0) { %>
+          <% Car_History.forEach(driver => { %>
+            <tr>
+              <td>
+                <% if (driver.photo) { %>
+                  <img src="<%= driver.photo %>" alt="Photo" class="driver-photo">
+                <% } else { %>
+                  <span style="color:gray;">No Photo</span>
+                <% } %>
+              </td>
+              <td><%= driver.Allocation_ID %></td>
+              <td><%= driver.Car_Number %></td>
+              <td><%= driver.Car_Type %></td>
+              <td><%= driver.AGD_ID %></td>
+              <td><%= driver.Driver_Name %></td>
+              <td><%= driver.Format %></td>
+              <td><%= driver.Date_From %></td>
+              <td><%= driver.Date_To %></td>
+              <td><%= driver.Total_Days %></td>
+              <td><%= driver.UUID %></td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="11" style="text-align:center; padding:20px; color:#666; font-weight:bold; background-color:#f9f9f9;">
+              No data available!
             </td>
-            <td><%= driver.Allocation_ID %></td>
-            <td><%= driver.Car_Number %></td>
-            <td><%= driver.Car_Type %></td>
-            <td><%= driver.AGD_ID %></td>
-            <td><%= driver.Driver_Name %></td>
-            <td><%= driver.Format %></td>
-            <td><%= driver.Date_From %></td>
-            <td><%= driver.Date_To %></td>
-            <td><%= driver.Total_Days %></td>
-            <td><%= driver.UUID %></td>
           </tr>
-        <% }) %>
+        <% } %>
       </tbody>
     </table>
   </div>

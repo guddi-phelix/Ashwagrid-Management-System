@@ -1,6 +1,5 @@
 require('dotenv').config();
 
-
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -92,7 +91,7 @@ app.post('/login', async (req, res) => {
   const { agdId, password } = req.body; 
   const token = 'sec@12jfl..idwh23';
 
-  const driverUrl = `https://script.google.com/macros/s/AKfycbwzaR0vdDc4GyQzqzpH48DxIpv5pUDV4svwTQ__eaGtH_ju4_yDH52lSYfg32VrfEOP/exec?agdId=${encodeURIComponent(agdId)}&password=${encodeURIComponent(password)}&token=${token}`;
+  const driverUrl = `https://script.google.com/macros/s/AKfycby6_v2ozzQX4sZ1UgGVy0OS8h_2EMu_fiILf_SCFuigFGDRno-wD2da6LFLrbaymSoX7Q/exec?agdId=${encodeURIComponent(agdId)}&password=${encodeURIComponent(password)}&token=${token}`;
 
   try {
     const driverResult = await fetch(driverUrl);
@@ -119,7 +118,7 @@ app.post('/login', async (req, res) => {
     const format = driverData.format ? driverData.format.trim() : "";
 
     // ✅ Check conditions
-    if (status === "login") {
+    if (status === "ACTIVE") {
       if (format === "Sub-Lease") {
         req.session.leased = true;
       return res.redirect('/leased-profile');
@@ -133,7 +132,7 @@ app.post('/login', async (req, res) => {
     else if (status === "Block") {
       return res.render('block', { message: "You are blocked." });
     } 
-    else if (status === "InActive") {
+    else if (status === "INACTIVE") {
       return res.render('inactive', { message: "You are not active. Try again later." });
     } 
     else {
@@ -169,7 +168,7 @@ app.post('/admin', async (req, res) => {
         }
 
         // Call Apps Script API
-        const url = `https://script.google.com/macros/s/AKfycbxbFKmFnoo2D4KVizV8I_276tQ67NvcPn7ofQjV51jjC6BYm5XiGvQMgNnet395rCPR/exec?token=${SECRET_TOKEN}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+        const url = `https://script.google.com/macros/s/AKfycbxwexI5uqE0DCKQyNyv6F7LXbrQ-jBhNLiljt3x3m7bFhHDOmzDVy-RfIVbrqhyB_YyHQ/exec?token=${SECRET_TOKEN}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
         const response = await fetch(url);
         const data = await response.json();
         console.log(data);
@@ -258,21 +257,16 @@ const jwtClient = new JWT({
   key: creds.private_key.replace(/\\n/g, '\n'),
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
-const doc = new GoogleSpreadsheet('17Bwt4UWx3cosXl0C0hxoF3-av2rrShmdhfbMky9IvOw', jwtClient);
-const doc1 = new GoogleSpreadsheet('1B24jaWNjK0RMgrljn2evxlILOBbf7P-6awX_XYsBcG4', jwtClient);
-const doc2 = new GoogleSpreadsheet('1GMrrR0go6VyVrot49hx-J22VwlWKoXE3npDl1oNzqPc', jwtClient);
-// driver_data sheet
-const doc3 = new GoogleSpreadsheet('1055AaVuJbiex-F-xxNXjPvCRCcG2ZgBeEAN5aLseZuU', jwtClient);//car history
-const doc5 = new GoogleSpreadsheet('1BjaACtElpoediYDcMZ1DJPX8G4bZKa6KYMbjB6mPUpw', jwtClient); //total os
-const doc6 = new GoogleSpreadsheet('1QCP9Hj4Hc1EkZeFdSZeHOnot5bzCEH0MC_o3p7sSuiE', jwtClient);//daily accounts
-const doc7 = new GoogleSpreadsheet('11w-Oc5Dc27kX5B67_VztGfJUafkfiDcVLo_NA3az5qU', jwtClient);//driver ids
-const doc8 = new GoogleSpreadsheet('1qZY44oiGylNUUCspqH7d7PWInKxZvNtmvLPWiAzsMdo', jwtClient);//variable performance
 
-const doc9 = new GoogleSpreadsheet('1yyZwIJVLdl4Airi2kI2Gj4N7vafUUcxfj7ExYhBdorA', jwtClient);//weekly account
+
+const doc3 = new GoogleSpreadsheet('1m26iVFtFHinCAOcp0tHWx1tkalsa1sdTtwbZjF5dgFg', jwtClient);//Master sheet ID
 
 async function addToSheet(reading, photoLink, username, vehicleNumber, date) {
-  await doc.loadInfo(); // load spreadsheet info
-  const sheet = doc.sheetsByIndex[0]; // first sheet
+  await doc3.loadInfo(); // load spreadsheet info
+
+  // ✅ Fetch sheet by name instead of index
+  const sheet = doc3.sheetsByTitle["Before_start"];
+
   await sheet.addRow({
     Date: date,
     Username: username,
@@ -280,12 +274,11 @@ async function addToSheet(reading, photoLink, username, vehicleNumber, date) {
     Reading: reading,
     Photo: photoLink,
   });
-  console.log("✅ Row added to sheet");
 }
 
 async function addToSheet1(cngQty, odometerLink, fillingLink, username, vehicleNumber, date, reading, amount) {
-  await doc1.loadInfo();
-  const sheet = doc1.sheetsByIndex[0];
+  await doc3.loadInfo();
+  const sheet = doc3.sheetsByTitle["Filling CNG"];
   await sheet.addRow({
     Date: date,
       Username: username,
@@ -297,11 +290,11 @@ async function addToSheet1(cngQty, odometerLink, fillingLink, username, vehicleN
       filling_cng_photo:fillingLink
 
   });
-  console.log('✅ Row added to sheet');
+  
 }
 async function addToSheet2(reading, photoLink, username, vehicleNumber, date) {
-  await doc2.loadInfo();
-  const sheet = doc2.sheetsByIndex[0];
+ await doc3.loadInfo();
+  const sheet = doc3.sheetsByTitle["After End"];
   await sheet.addRow({
     Date: date,
     Username: username,
@@ -309,13 +302,13 @@ async function addToSheet2(reading, photoLink, username, vehicleNumber, date) {
     Reading: reading,
     Photo: photoLink
   });
-  console.log('✅ Row added to sheet');
+
 }
 
 app.get('/before_start', (req, res) => {
    if (!req.session.username) {
     return res.redirect('/'); }
-  res.render('Before_start'); // or res.render(...) if using EJS
+  res.render('Before_start'); // 
 });
 
 app.post("/before_start", upload.single("file"), async (req, res) => {
@@ -349,7 +342,7 @@ app.post("/before_start", upload.single("file"), async (req, res) => {
     // ===== Add row to Google Sheet =====
     await addToSheet(reading, photoLink, username, vehicleNumber, date);
 
-    res.redirect("submit-page");
+    res.redirect("/submit-page");
 
   } catch (err) {
     console.error("Upload error:", err);
@@ -362,7 +355,14 @@ app.post("/before_start", upload.single("file"), async (req, res) => {
 app.get('/submit-page',(req, res) => {
    if (!req.session.username) {
     return res.redirect('/'); }
-  res.render('submit_page'); // 
+    res.render('submit_page'); 
+});
+
+
+app.get('/Filling-cng', (req, res) => {
+   if (!req.session.username) {
+    return res.redirect('/'); }
+  res.render('Filling_cng'); 
 });
 
 
@@ -398,7 +398,7 @@ app.post("/Filling-cng", upload.fields([
     await addToSheet1(cngQty, odometerLink, cngLink, username, vehicleNumber, date, reading, amount);
 
     // Render success page
-     res.redirect("submit-page");
+    res.redirect("/submit-page");
 
   } catch (err) {
     console.error(err);
@@ -412,7 +412,7 @@ app.post("/Filling-cng", upload.fields([
 app.get('/After-end', (req, res) => {
    if (!req.session.username) {
     return res.redirect('/'); }
-  res.render('After_end'); // or res.render(...) if using EJS
+  res.render('After_end'); 
 });
 
 app.post("/After-end", upload.single("file"), async (req, res) => {
@@ -447,10 +447,8 @@ app.post("/After-end", upload.single("file"), async (req, res) => {
     await addToSheet2(reading, photoLink, username, vehicleNumber, date);
 
     // ===== Show success page with link =====
-    res.render("submit_page", {
-      message: `✅ File successfully uploaded! <a href="${photoLink}" target="_blank">View Image</a>`,
-      backLink: "/",
-    });
+  
+     res.redirect("/submit-page");
 
   } catch (err) {
     console.error("Upload error in /After-end:", err);
@@ -462,36 +460,38 @@ app.post("/After-end", upload.single("file"), async (req, res) => {
   }
 });
 
-// Total OS Route
 app.get('/Total_os', async (req, res) => {
-    if (!req.session.admin) {
+  if (!req.session.admin) {
     return res.redirect('/'); 
   }
   try {
-    await doc5.loadInfo();
-    const sheet = doc5.sheetsByIndex[0];
-    await sheet.loadHeaderRow(1);
+    await doc3.loadInfo();
+
+
+    const sheet = doc3.sheetsByTitle["Total OS"];
+    await sheet.loadHeaderRow();
 
     const rows = await sheet.getRows();
 
-    const totalos = rows.map(row => ({
-      WhatsApp_Number:row._rawData[0],
-      Uber_Registered_Number:row._rawData[1],
-      Name: row._rawData[2],
-       AGD_ID:row._rawData[3],
-      Weekly_OS:row._rawData[4],
-      Daily_Hisaab:row._rawData[5],
-       Total_OS:row._rawData[6]
-    
-    }));
-    res.render('Total_os', { totalos, layout: false }); // 🔁 use short version + layout: false
+    const totalos = rows
+  
+      .map(row => ({
+        WhatsApp_Number: row._rawData[0],
+        Uber_Registered_Number: row._rawData[1],
+        Name: row._rawData[2],
+        AGD_ID: row._rawData[3],
+        Weekly_OS: row._rawData[4],
+        Daily_Hisaab: row._rawData[5],
+        Total_OS: row._rawData[6]
+      }));
+
+    res.render('Total_os', { totalos, layout: false });
 
   } catch (error) {
-    console.error('❌ Error fetching leased drivers:', error);
-    res.send('⚠️ Failed to load leased drivers.');
+    console.error('❌ Error fetching Total OS:', error);
+    res.send('⚠️ Failed to load Total OS.');
   }
 });
-
 
 
 // Daily accounts
@@ -533,96 +533,114 @@ app.get('/Daily_accounts', async (req, res) =>  {
   }
 
 });
-
-
 app.get('/Weekly_accounts', async (req, res) => {
-   if (!req.session.admin) {
-    return res.redirect('/'); }
+  if (!req.session.admin) {
+    return res.redirect('/');
+  }
+
   try {
-    await doc9.loadInfo();
-    const sheet = doc9.sheetsByIndex[0];
-    await sheet.loadHeaderRow(1);
+    await doc3.loadInfo();
+
+    // Load all required sheets
+    const weeklySheet = doc3.sheetsByTitle["Weekly Hisaab"];
+    const loginSheet = doc3.sheetsByTitle["Login"];
+    const variableSheet = doc3.sheetsByTitle["Variable Performance"];
+    const cngSheet = doc3.sheetsByTitle["Filling CNG"];
+
+    await Promise.all([
+      weeklySheet.loadHeaderRow(),
+      loginSheet.loadHeaderRow(),
+      variableSheet.loadHeaderRow(),
+      cngSheet.loadHeaderRow()
+    ]);
+
+    // Fetch rows from all sheets
+    const [weeklyRows, loginRows, variableRows,cngRows] = await Promise.all([
+      weeklySheet.getRows(),
+      loginSheet.getRows(),
+      variableSheet.getRows(),
+      cngSheet.getRows()
+    ]);
+
+    // Merge rows based on Driver_ID
+    const Weekly_accounts = weeklyRows.map(row => {
+      const driverId = row._rawData[3]; // Driver ID from WeeklyAccounts (adjust index if different)
+      const driver_Vehicle = row._rawData[0];
+      return {
+        Driver_ID: driverId,  
+        Assigned_Car: (loginRows.find(r => r._rawData[0] === driverId) || {})._rawData?.[6] || "",
+        Week_Start: row._rawData[21] || "",
+        Week_End: row._rawData[22] || "",
+        Cash_Collection: row._rawData[11] || "",
+        Login_hours: (variableRows.find(r => r._rawData[0] === driverId) || {})._rawData?.[4] || "",
+        Toll: row._rawData[10] || "",
+        CNG: (cngRows.find(r => r._rawData[2] === driver_Vehicle) || {})._rawData?.[4] || "",
+        Driver_salary: row._rawData[24] || "",
+        Adjustment: row._rawData[16] || "",
+        Final_amt: row._rawData[17] || "",
+        Status: (loginRows.find(r => r._rawData[0] === driverId) || {})._rawData?.[4] || ""
+      };
+    });
+   console.log(Weekly_accounts);
+    res.render('Weekly_accounts', { Weekly_accounts, layout: false });
+
+  } catch (error) {
+    console.error('❌ Error fetching Weekly accounts:', error);
+    res.send('⚠️ Failed to load Weekly accounts.');
+  }
+});
+
+app.get('/Driver_ids', async (req, res) => {
+  if (!req.session.admin) {
+    return res.redirect('/');
+  }
+
+  try {
+    await doc3.loadInfo();
+
+    // ✅ Get only from the "WeeklyAccounts" sheet
+    const sheet = doc3.sheetsByTitle["Driver IDs"];
+    await sheet.loadHeaderRow();
 
     const rows = await sheet.getRows();
 
-    const Weekly_accounts = rows.map(row => ({
-      Driver_ID:row._rawData[0],
-      Assigned_Car: row._rawData[1],
-      Week_Start:row._rawData[2],
-      Week_End:row._rawData[3],
-      Cash_Collection:row._rawData[4],
-      Login_hours:row._rawData[5],
-      Toll:row._rawData[6],
-      CNG: row._rawData[7],
-      Driver_salary:row._rawData[8],
-      Adjustment:row._rawData[9],
-      Final_amt:row._rawData[10],
-      Status:row._rawData[11],
-    
-    }));
-    console.log(Weekly_accounts)
-    res.render('Weekly_accounts', { Weekly_accounts, layout: false }); // 🔁 use short version + layout: false
+    // ✅ Map rows into objects
+    const Driver_ids = rows
+      .map((row) => {
+        return {
+          UUID: row._rawData[0],
+          AGD_ID: row._rawData[1],
+          Recruited_From: row._rawData[2],
+          AGD_ID_of_referee: row._rawData[3],
+          Relation: row._rawData[4],
+          Contact_Number: row._rawData[5],
+          Driver_Name_in_Uber: row._rawData[6],
+          WhatsApp_Number: row._rawData[7],
+          Uber_Registered_Mobile_Number: row._rawData[8],
+          Alternate_Contact_Number: row._rawData[9],
+          Emergency_Contact_Number: row._rawData[10],
+          Name_of_Emergency_Contact: row._rawData[11],
+          Relation_with_Emergency_Contact: row._rawData[12],
+          Present_Address: row._rawData[13],
+          Permanent_Address: row._rawData[14],
+          Age_of_Driver: row._rawData[15],
+          Marital_Status: row._rawData[16],
+          Selfie: row._rawData[17],
+          Aadhar_Card_Number: row._rawData[18],
+          Aadhar_Card_Front: row._rawData[19],
+          Aadhar_Card_Back: row._rawData[20],
+          Driving_License_Number: row._rawData[21],
+          Driving_License_Front: row._rawData[22],
+          Driving_License_Back: row._rawData[23],
+          Pan_Card_Number: row._rawData[24],
+          Pan_Card: row._rawData[25],
+          House_Rented_or_Owned: row._rawData[26],
+          Electricity_Bill: row._rawData[27]
+        };
+      })
 
-  } catch (error) {
-    console.error('❌ Error fetching leased drivers:', error);
-    res.send('⚠️ Failed to load leased drivers.');
-  }
-});
-// driver ids
-app.get('/Driver_ids', async (req, res) => {
-   if (!req.session.admin) {
-    return res.redirect('/'); }
-  try {
-    await doc7.loadInfo();
+    console.log("✅ Filtered Driver IDs:", Driver_ids);
 
-    // Read sheet 1 (main driver data)
-    const sheet1 = doc7.sheetsByIndex[0];
-    await sheet1.loadHeaderRow(1);
-    const rows1 = await sheet1.getRows();
-
-    // Read sheet 2 (extra 2 columns)
-    const sheet2 = doc7.sheetsByIndex[1];
-    await sheet2.loadHeaderRow(1);
-    const rows2 = await sheet2.getRows();
-
-    // Merge sheet1 and sheet2 by index
-    const Driver_ids = rows1.map((row, index) => {
-      const extraData = rows2[index] || {}; // in case sheet2 has fewer rows
-      return {
-        UUID: row._rawData[0],
-        AGD_ID: row._rawData[1],
-        Recruited_From: row._rawData[2],
-        AGD_ID_of_referee: row._rawData[3],
-        Relation: row._rawData[4],
-        Contact_Number: row._rawData[5],
-        Driver_Name_in_Uber: row._rawData[6],
-        WhatsApp_Number: row._rawData[7],
-        Uber_Registered_Mobile_Number: row._rawData[8],
-        Alternate_Contact_Number: row._rawData[9],
-        Emergency_Contact_Number: row._rawData[10],
-        Name_of_Emergency_Contact: row._rawData[11],
-        Relation_with_Emergency_Contact: row._rawData[12],
-        Present_Address: row._rawData[13],
-        Permanent_Address: row._rawData[14],
-        Age_of_Driver: row._rawData[15],
-        Marital_Status: row._rawData[16],
-        Selfie: row._rawData[17],
-        Aadhar_Card_Number: row._rawData[18],
-        Aadhar_Card_Front: row._rawData[19],
-        Aadhar_Card_Back: row._rawData[20],
-        Driving_License_Number: row._rawData[21],
-        Driving_License_Front: row._rawData[22],
-        Driving_License_Back: row._rawData[23],
-        Pan_Card_Number: row._rawData[24],
-        Pan_Card: row._rawData[25],
-
-        // Data from sheet 2 (same row index)
-        House_Rented_or_Owned: extraData._rawData ? extraData._rawData[0] : '',
-        Electricity_Bill: extraData._rawData ? extraData._rawData[1] : ''
-      };
-    });
-
-    console.log(Driver_ids);
     res.render('Driver_ids', { Driver_ids, layout: false });
 
   } catch (error) {
@@ -630,90 +648,129 @@ app.get('/Driver_ids', async (req, res) => {
     res.send('⚠️ Failed to load driver IDs.');
   }
 });
-//car history
+
 app.get('/Car_History', async (req, res) => {
-   if (!req.session.admin) {
-    return res.redirect('/'); }
+  if (!req.session.admin) {
+    return res.redirect('/');
+  }
+
   try {
     await doc3.loadInfo();
-    const sheet = doc3.sheetsByIndex[0];
-    await sheet.loadHeaderRow(1);
 
-    const rows = await sheet.getRows();
+    // Load Login sheet
+    const loginSheet = doc3.sheetsByTitle["Login"];
+    await loginSheet.loadHeaderRow();
+    const loginRows = await loginSheet.getRows();
 
-    const Car_History = rows.map(row => ({
-      Allocation_ID:row._rawData[0],
-      Car_Number: row._rawData[1],
-      Car_Type:row._rawData[2],
-      AGD_ID:row._rawData[3],
-      Driver_Name:row._rawData[4],
-     Format: row._rawData[5] === "Sub-Lease" ? "Lease" : row._rawData[5],
-      Date_From:row._rawData[6],
-      Date_To: row._rawData[7],
-      Total_Days:row._rawData[8],
-      UUID:row._rawData[9],
-      photo:row._rawData[10]
-    }));
-    console.log(Car_History)
-    res.render('Car_History', { Car_History, layout: false }); // 🔁 use short version + layout: false
+    // Load Weekly Hisaab sheet
+    const weeklySheet = doc3.sheetsByTitle["Driver IDs"];
+    await weeklySheet.loadHeaderRow();
+    const weeklyRows = await weeklySheet.getRows();
+
+    // Build Car History: all data from Login + UUID from Weekly by matching AGD_ID
+    const Car_History = loginRows.map(row => {
+      const agdId = row._rawData[0]; // AGD_ID in Login sheet
+
+      // Find matching row in Weekly sheet
+      const weeklyRow = weeklyRows.find(wRow => wRow._rawData[1] === agdId); // adjust index for AGD_ID in Weekly sheet
+
+      return {
+        Allocation_ID: row._rawData[7],
+        Car_Number: row._rawData[6],
+        Car_Type: row._rawData[8],
+        AGD_ID: agdId,
+        Driver_Name: row._rawData[1],
+        Format: row._rawData[3] === "Sub-Lease" ? "Lease" : row._rawData[3],
+        Date_From: row._rawData[9],
+        Date_To: row._rawData[10],
+        Total_Days: row._rawData[11],
+        photo: row._rawData[5],
+        UUID: weeklyRow ? weeklyRow._rawData[0] : "" // fetch UUID from Weekly sheet if exists
+      };
+    });
+
+    
+    res.render("Car_History", { Car_History, layout: false });
 
   } catch (error) {
-    console.error('❌ Error fetching leased drivers:', error);
-    res.send('⚠️ Failed to load leased drivers.');
+    console.error("❌ Error fetching Car History:", error);
+    res.send("⚠️ Failed to load Car History.");
   }
 });
 
+//function for fetching the sheet data based on the sheet name using the id of the master sheet
+async function getSheetData(sheetName) {
+  await doc3.loadInfo(); 
+  const sheet = doc3.sheetsByTitle[sheetName]; // 👈 sheet tab name
+  if (!sheet) throw new Error(`❌ Sheet "${sheetName}" not found`);
+  await sheet.loadHeaderRow();
+  return await sheet.getRows();
+}
 
-// Lease Drivers Route
+// Example usage in routes
+// Leased Drivers Route
 app.get('/leased-drivers', async (req, res) => {
-   if (!req.session.admin) {
-    return res.redirect('/'); }
+  if (!req.session.admin) {
+    return res.redirect('/');
+  }
   try {
     await doc3.loadInfo();
-    const sheet = doc3.sheetsByIndex[0];
-    await sheet.loadHeaderRow(1);
 
+    const sheet = doc3.sheetsByTitle["Login"]; // tab name
+    await sheet.loadHeaderRow();
     const rows = await sheet.getRows();
 
     const leasedDrivers = rows
-      .filter(row => row._rawData[5]?.toLowerCase().trim() === 'sub-lease')
+      .filter(row =>
+        row._rawData[1] && // username
+        row._rawData[6] && // vehicle
+        row._rawData[3] && // lease
+        row._rawData[5] && // photo
+        row._rawData[3]?.toLowerCase().trim() === 'sub-lease'
+      )
       .map(row => ({
-        username: row._rawData[4],
-        vehicle: row._rawData[1],
-        lease: row._rawData[5],
-        photo: row._rawData[10]
+        username: row._rawData[1],
+        vehicle: row._rawData[6],
+        lease: row._rawData[3],
+        photo: row._rawData[5]
       }));
-
-    res.render('leased_drivers_list', { leasedDrivers, layout: false }); // 🔁 use short version + layout: false
-
-  } catch (error) {
-    console.error('❌ Error fetching leased drivers:', error);
-    res.send('⚠️ Failed to load leased drivers.');
+console.log(leasedDrivers);
+    res.render('leased_drivers_list', { leasedDrivers, layout: false });
+  } catch (err) {
+    console.error("❌ Error:", err);
+    res.send("⚠️ Failed to load leased drivers.");
   }
 });
 
+
 // Non-Lease Drivers Route
 app.get('/non-leased-drivers', async (req, res) => {
-   if (!req.session.admin) {
-    return res.redirect('/'); }
+  if (!req.session.admin) {
+    return res.redirect('/');
+  }
   try {
     await doc3.loadInfo();
-    const sheet = doc3.sheetsByIndex[0];
-    await sheet.loadHeaderRow(1);
 
+    const sheet = doc3.sheetsByTitle["Login"]; // tab name
+    await sheet.loadHeaderRow();
     const rows = await sheet.getRows();
 
     const nonLeasedDrivers = rows
-      .filter(row => row._rawData[5]?.toLowerCase().trim() !== 'sub-lease')
+      .filter(row =>
+        row._rawData[1] && // username
+        row._rawData[6] && // vehicle
+        row._rawData[3] && // lease
+        row._rawData[5] && // photo
+        row._rawData[3]?.toLowerCase().trim() !== 'sub-lease'
+      )
       .map(row => ({
-         username: row._rawData[4],
-        vehicle: row._rawData[1],
-        lease: row._rawData[5],
-        photo: row._rawData[10]
+        username: row._rawData[1],
+        vehicle: row._rawData[6],
+        lease: row._rawData[3],
+        photo: row._rawData[5]
       }));
 
-    res.render('non_leased_drivers_list', { nonLeasedDrivers, layout: false }); // 🔁 short version + layout: false
-
+    res.render('non_leased_drivers_list', { nonLeasedDrivers, layout: false });
   } catch (error) {
     console.error('❌ Error fetching non-leased drivers:', error);
     res.send('⚠️ Failed to load non-leased drivers.');
@@ -722,16 +779,15 @@ app.get('/non-leased-drivers', async (req, res) => {
 
 
 
-
 app.get('/admin-view-lease-driver-profile',async (req, res) => {
    if (!req.session.admin) {
     return res.redirect('/'); }
   const username = req.query.username;
-  console.log(username)
+  console.log(username);
   const token ='sec@12jfl..idwh23';
 
   // Call the Apps Script to get the user details
-  const url = `https://script.google.com/macros/s/AKfycbwzaR0vdDc4GyQzqzpH48DxIpv5pUDV4svwTQ__eaGtH_ju4_yDH52lSYfg32VrfEOP/exec?username=${encodeURIComponent(username)}&token=${token}`;
+  const url = `https://script.google.com/macros/s/AKfycby6_v2ozzQX4sZ1UgGVy0OS8h_2EMu_fiILf_SCFuigFGDRno-wD2da6LFLrbaymSoX7Q/exec?username=${encodeURIComponent(username)}&token=${token}`;
 
   try {
     const response = await fetch(url);
@@ -763,7 +819,7 @@ app.get('/admin-view-nonlease-driver-profile', async (req, res) => {
   const token ='sec@12jfl..idwh23';
 
   // Call the Apps Script to get the user details
-  const url = `https://script.google.com/macros/s/AKfycbwzaR0vdDc4GyQzqzpH48DxIpv5pUDV4svwTQ__eaGtH_ju4_yDH52lSYfg32VrfEOP/exec?username=${encodeURIComponent(username)}&token=${token}`;
+  const url = `https://script.google.com/macros/s/AKfycby6_v2ozzQX4sZ1UgGVy0OS8h_2EMu_fiILf_SCFuigFGDRno-wD2da6LFLrbaymSoX7Q/exec?username=${encodeURIComponent(username)}&token=${token}`;
 
   try {
     const response = await fetch(url);
@@ -836,24 +892,25 @@ app.get('/driver_daily_accounts', async (req, res) => {
 
 // Route to get data for a specific driver
 app.get('/variable-performance', async (req, res) => {
-   if (!req.session.username) {
-    return res.redirect('/'); }
+  if (!req.session.username) {
+    return res.redirect('/');
+  }
   try {
-    const vehicleNumber = req.session.vehicleNumber; // Get logged-in driver's username
-    console.log("user",vehicleNumber)
-    if (!vehicleNumber) {
+    const driverName = req.session.agdId; 
+
+    if (!driverName) {
       return res.redirect('/'); // if not logged in
     }
-  
-    await doc8.loadInfo();
-    const sheet = doc8.sheetsByIndex[0];
-    await sheet.loadHeaderRow(1);
+
+    await doc3.loadInfo();
+    const sheet = doc3.sheetsByTitle["Variable Performance"]; // ✅ better to fetch by tab name
+    await sheet.loadHeaderRow();
 
     const rows = await sheet.getRows();
-    
-    // Filter only the data of this user
+
+    // Filter by driver name + ensure all columns are filled
     const driverData = rows
-      .filter(row => row._rawData[1] === vehicleNumber) // Driver_Name in index 1
+      .filter(row => row._rawData[0]?.trim() === driverName)
       .map(row => ({
         AGD_ID: row._rawData[0],
         Car_number: row._rawData[1],
@@ -865,7 +922,8 @@ app.get('/variable-performance', async (req, res) => {
         Acceptance_Rate: row._rawData[7],
         Updated_At: row._rawData[8],
       }));
-    console.log("data:",driverData)
+
+    console.log("data:", driverData);
     res.render('Variable_performace', { driverData, layout: false });
 
   } catch (error) {
@@ -873,7 +931,6 @@ app.get('/variable-performance', async (req, res) => {
     res.send('⚠️ Failed to load driver data.');
   }
 });
-
 
 
 

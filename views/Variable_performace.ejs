@@ -3,84 +3,104 @@
 <head>
   <meta charset="UTF-8">
   <title>Variable Performance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f4f6f9;
-      color: #333;
-      margin: 0;
-      padding: 20px;   /* added padding instead of centering */
-    }
+ body {
+  font-family: 'Poppins', sans-serif;
+  background: #f4f6f9;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+.record {
+  background: #fff;
+  border-left: 6px solid #ff6600;
+  border-radius: 12px;
+  padding: 20px 15px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+.car-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+.due-amount {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #d32f2f;
+  word-break: break-word;
+}
+/* IMPROVED FIELD ROW */
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed #e1e1e1;
+  gap: 0;
+}
+.field-row:last-child {
+  border-bottom: none;
+}
+.field-name {
+  font-size: 18px;
+  color: #555;
+  min-width: 0;
+  flex: 1 1 45%;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.field-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  flex: 1 1 45%;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.positive { color: #2e7d32; }
+.negative { color: #c62828; }
+.neutral { color: #555; }
 
-    .container {
-      width: 100%;
-      max-width: 1000px;  /* keeps content readable */
-      margin: 0 auto;    /* center horizontally */
-    }
+@media (max-width: 768px) {
+  body { padding: 8px; }
+  .container { padding: 0 2px; }
+  .record { padding: 16px 6px; }
+  .car-number { font-size: 22px; }
+  .due-amount { font-size: 17px; }
+  .field-name, .field-value { font-size: 20px; }
+}
+@media (max-width: 480px) {
+  .car-number { font-size: 19px; }
+  .due-amount { font-size: 15px; }
+  .record { padding: 10px 3px; }
+  .field-name, .field-value { font-size: 20px; }
+  .field-row { padding: 8px 0; }
+}
+@media (max-width: 360px) {
+  .car-number { font-size: 17px; }
+  .due-amount { font-size: 14px; }
+  .record { padding: 7px 0; }
+  .field-name, .field-value { font-size: 20px; }
+  .field-row { padding: 6px 0; }
+}
 
-    .record {
-      background: #fff;
-      border-left: 6px solid #ff6600;
-      border-radius: 12px;
-      padding: 25px 20px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-      margin-bottom: 20px; /* spacing between records */
-    }
-
-    .date-range {
-      font-size: 15px;
-      font-weight: 600;
-      color: #ff6600;
-      margin-bottom: 8px;
-    }
-
-    .car-number {
-      font-size: 24px;
-      font-weight: 700;
-      color: #222;
-      margin-bottom: 12px;
-    }
-
-    .due-amount {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 18px;
-      color: #d32f2f;
-    }
-
-    .field-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px dashed #e1e1e1;
-    }
-
-    .field-row:last-child {
-      border-bottom: none;
-    }
-
-    .field-name {
-      font-size: 16px;
-      color: #555;
-    }
-
-    .field-value {
-      font-size: 16px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    /* Highlight values */
-    .positive {
-      color: #2e7d32;
-    }
-    .negative {
-      color: #c62828;
-    }
-    .neutral {
-      color: #555;
-    }
   </style>
 </head>
 <body>
@@ -88,7 +108,6 @@
     <% if (driverData && driverData.length > 0) { %>
       <% driverData.forEach(record => { %>
         <div class="record">
-     
           <div class="car-number"><%= record.Car_number %></div>
           <div class="due-amount">AGD ID: <%= record.AGD_ID%></div>
 
