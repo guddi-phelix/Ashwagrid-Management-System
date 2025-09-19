@@ -57,9 +57,7 @@
     border-bottom: 1px solid #ddd;
   }
 
-  tbody tr:hover {
-    background-color: #fffae6;
-  }
+
 
   /* Profile image */
   .driver-photo {
@@ -77,12 +75,17 @@
   <!-- Controls -->
   <div class="controls">
     <select id="sortSelect">
-      <option value="">Sort By</option>
-      <option value="nameAsc">Username A → Z</option>
-      <option value="nameDesc">Username Z → A</option>
-      <option value="vehicleAsc">Vehicle No ↑</option>
-      <option value="vehicleDesc">Vehicle No ↓</option>
-    </select>
+  <option value="">Sort By</option>
+  <option value="nameAsc">Username A → Z</option>
+  <option value="nameDesc">Username Z → A</option>
+  <option value="dateFromAsc">Date From ↑</option>
+  <option value="dateFromDesc">Date From ↓</option>
+  <option value="dateToAsc">Date To ↑</option>
+  <option value="dateToDesc">Date To ↓</option>
+  <option value="totalDaysAsc">Total Days ↑</option>
+  <option value="totalDaysDesc">Total Days ↓</option>
+</select>
+
 
     <input type="text" id="searchInput" placeholder="Search...">
   </div>
@@ -105,7 +108,7 @@
           <th>UUID</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="tableBody">
         <% if (Car_History && Car_History.length > 0) { %>
           <% Car_History.forEach(driver => { %>
             <tr>

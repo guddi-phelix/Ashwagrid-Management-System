@@ -329,22 +329,25 @@ function activateSearchAndSort() {
     });
 
     // Sorting
-    filteredRows.sort((a, b) => {
-      let agdA = a.cells[3]?.innerText.trim();
-      let agdB = b.cells[3]?.innerText.trim();
 
-      let numA = agdA ? parseInt(agdA.split('_').pop()) : 0;
-      let numB = agdB ? parseInt(agdB.split('_').pop()) : 0;
+filteredRows.sort((a, b) => {
+  let agdA = a.cells[3]?.innerText.trim();
+  let agdB = b.cells[3]?.innerText.trim();
 
-      let nameA = a.cells[2]?.innerText.trim().toLowerCase();
-      let nameB = b.cells[2]?.innerText.trim().toLowerCase();
+  // Get last 2 digits of AGD id (like AFY-TY-30 → 30)
+  let numA = agdA ? parseInt(agdA.split("-").pop().slice(-2)) : 0;
+  let numB = agdB ? parseInt(agdB.split("-").pop().slice(-2)) : 0;
 
-      if (sortType === "agdAsc") return numA - numB;
-      if (sortType === "agdDesc") return numB - numA;
-      if (sortType === "nameAsc") return nameA.localeCompare(nameB);
-      if (sortType === "nameDesc") return nameB.localeCompare(nameA);
-      return 0;
-    });
+  let nameA = a.cells[2]?.innerText.trim();
+  let nameB = b.cells[2]?.innerText.trim();
+
+  if (sortType === "agdAsc") return numA - numB;
+  if (sortType === "agdDesc") return numB - numA;
+  if (sortType === "nameAsc") return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
+  if (sortType === "nameDesc") return nameB.localeCompare(nameA, undefined, { sensitivity: 'base' });
+  return 0;
+});
+
 
     // Render filtered rows
     tableBody.innerHTML = "";
@@ -616,18 +619,33 @@ function activateSearchAndSort4() {
   let allRows = Array.from(tableBody.querySelectorAll("tr"));
 
   function parseDate(dateStr) {
-    // Accepts both dd-mm-yyyy with or without leading zero
-    if (!dateStr) return null;
-    let parts = dateStr.split("-");
-    if (parts.length !== 3) return null;
+  if (!dateStr) return null;
 
-    let day = parseInt(parts[0], 10);   // 01 → 1
-    let month = parseInt(parts[1], 10) - 1; // 01 → 0 (JS months are 0-based)
-    let year = parseInt(parts[2], 10);
+  // Example formats: "2-Jun-25", "20-Mon-25"
+  let parts = dateStr.split("-");
+  if (parts.length !== 3) return null;
 
-    if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
-    return new Date(year, month, day);
+  let day = parseInt(parts[0], 10);
+  let monthStr = parts[1].toLowerCase();
+  let year = parseInt(parts[2], 10);
+
+  // Handle 2-digit year → assume 2000+
+  if (year < 100) {
+    year = 2000 + year;
   }
+
+  // Map short month names to numbers
+  const monthMap = {
+    jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+    jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+  };
+
+  let month = monthMap[monthStr];
+  if (month === undefined) return null;
+
+  return new Date(year, month, day);
+}
+
 
   function applyFilters() {
     let filter = searchInput.value.toLowerCase();
@@ -734,42 +752,65 @@ function activateSearchAndSort5() {
 
   let allRows = Array.from(tableBody.querySelectorAll("tr"));
 
+  // ✅ Safe highlighter (keeps <a> links clickable)
+  function highlightMatches(element, filter) {
+    if (!filter) return;
+
+    const regex = new RegExp(`(${filter})`, "gi");
+
+    element.childNodes.forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (regex.test(node.textContent)) {
+          const span = document.createElement("span");
+          span.innerHTML = node.textContent.replace(
+            regex,
+            `<span style="background: yellow; font-weight: bold;">$1</span>`
+          );
+          node.replaceWith(...span.childNodes);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        highlightMatches(node, filter); // recursive for <a>, <span>, etc.
+      }
+    });
+  }
+
   function applyFilters() {
     let filter = searchInput.value.toLowerCase();
     let sortType = sortSelect.value;
 
     let filteredRows = allRows.filter(row => {
-      let rowText = row.textContent.toLowerCase();
+  let rowText = row.textContent.toLowerCase();
 
-      // Reset highlights
-      row.querySelectorAll("td").forEach(td => {
-        td.innerHTML = td.textContent;
-      });
+  // ✅ Reset highlights only (don’t kill links)
+  row.querySelectorAll("td").forEach(td => {
+    td.innerHTML = td.innerHTML.replace(/<span style="background: yellow; font-weight: bold;">(.*?)<\/span>/gi, "$1");
+  });
 
-      // Highlight matches
-      if (filter && rowText.includes(filter)) {
-        row.querySelectorAll("td").forEach(td => {
-          let text = td.textContent;
-          td.innerHTML = text.replace(
-            new RegExp(`(${filter})`, "gi"),
-            `<span style="background: yellow; font-weight: bold;">$1</span>`
-          );
-        });
-      }
-
-      return rowText.includes(filter) || !filter;
+  // Highlight matches safely
+  if (filter && rowText.includes(filter)) {
+    row.querySelectorAll("td").forEach(td => {
+      highlightMatches(td, filter);
     });
+  }
+
+  return rowText.includes(filter) || !filter;
+});
+
 
     // ✅ Sorting logic (AGD ID last 2 digits + Age)
     filteredRows.sort((a, b) => {
-      let agdA = a.cells[3]?.innerText.trim() || "";
-      let agdB = b.cells[3]?.innerText.trim() || "";
+      // Correct AGD ID column (index 1)
+      let agdA = a.cells[1]?.innerText.trim() || "";
+      let agdB = b.cells[1]?.innerText.trim() || "";
 
-      // Extract last 2 digits only (ignores leading zeros)
-      let numA = parseInt(agdA.slice(-2).replace(/^0+/, "")) || 0;
-      let numB = parseInt(agdB.slice(-2).replace(/^0+/, "")) || 0;
+      // Extract last 2 digits after "-"
+      let lastA = agdA.split("-").pop();
+      let lastB = agdB.split("-").pop();
 
-      // Age column (index 15)
+      let numA = parseInt(lastA.slice(-2)) || 0;
+      let numB = parseInt(lastB.slice(-2)) || 0;
+
+      // Correct Age column (index 15)
       let ageA = parseInt(a.cells[15]?.innerText.trim()) || 0;
       let ageB = parseInt(b.cells[15]?.innerText.trim()) || 0;
 
@@ -777,6 +818,7 @@ function activateSearchAndSort5() {
       if (sortType === "agdDesc") return numB - numA;
       if (sortType === "ageAsc") return ageA - ageB;
       if (sortType === "ageDesc") return ageB - ageA;
+
       return 0;
     });
 
@@ -812,26 +854,22 @@ function activateSearchAndSort6() {
 
   let allRows = Array.from(tableBody.querySelectorAll("tr"));
 
-  // Parse dates in DD-MM-YYYY or D-M-YYYY formats
+  // Parse D-MMM-YY (like 3-jun-25)
   function parseDate(dateStr) {
     if (!dateStr) return new Date(0);
     const parts = dateStr.trim().split("-");
     if (parts.length !== 3) return new Date(0);
 
-    let day, month, year;
+    const day = parseInt(parts[0], 10);
+    const monthStr = parts[1].toLowerCase();
+    const year = 2000 + parseInt(parts[2], 10); // "25" -> 2025
 
-    if (parts[2].length === 4) { // DD-MM-YYYY
-      day = parseInt(parts[0], 10);
-      month = parseInt(parts[1], 10) - 1;
-      year = parseInt(parts[2], 10);
-    } else if (parts[0].length === 2) { // YY-MM-DD
-      year = 2000 + parseInt(parts[0], 10);
-      month = parseInt(parts[1], 10) - 1;
-      day = parseInt(parts[2], 10);
-    } else {
-      return new Date(0);
-    }
+    const months = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+    };
 
+    const month = months[monthStr] ?? 0;
     return new Date(year, month, day);
   }
 
@@ -873,6 +911,9 @@ function activateSearchAndSort6() {
       const dateToA = parseDate(a.cells[8]?.innerText.trim());
       const dateToB = parseDate(b.cells[8]?.innerText.trim());
 
+      const totalDaysA = parseInt(a.cells[9]?.innerText.trim()) || 0;
+      const totalDaysB = parseInt(b.cells[9]?.innerText.trim()) || 0;
+
       switch (sortType) {
         case "nameAsc": return nameA.localeCompare(nameB);
         case "nameDesc": return nameB.localeCompare(nameA);
@@ -880,6 +921,8 @@ function activateSearchAndSort6() {
         case "dateFromDesc": return dateFromB - dateFromA;
         case "dateToAsc": return dateToA - dateToB;
         case "dateToDesc": return dateToB - dateToA;
+        case "totalDaysAsc": return totalDaysA - totalDaysB;
+        case "totalDaysDesc": return totalDaysB - totalDaysA;
         default: return 0;
       }
     });
@@ -906,7 +949,6 @@ function activateSearchAndSort6() {
   searchInput.addEventListener("keyup", applyFilters);
   sortSelect.addEventListener("change", applyFilters);
 }
-
 
 </script>
 <script>
