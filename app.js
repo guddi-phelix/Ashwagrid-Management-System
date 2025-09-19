@@ -334,10 +334,16 @@ app.post("/before_start", upload.single("file"), async (req, res) => {
     const photoLink = `${baseUrl}/image/${savedImage._id}`;
 
     // ===== Format current date =====
-    const date = new Date().toLocaleString('en-IN', {
-      day: '2-digit', month: 'long', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', hour12: true
-    });
+    const date = new Date().toLocaleString("en-IN", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "Asia/Kolkata"   // <-- Force IST
+});
+
 
     // ===== Add row to Google Sheet =====
     await addToSheet(reading, photoLink, username, vehicleNumber, date);
@@ -376,10 +382,15 @@ app.post("/Filling-cng", upload.fields([
     const username = req.session.username;
     const vehicleNumber = req.session.vehicleNumber;
   // adjust
-   const date = new Date().toLocaleString('en-IN', {
-      day: '2-digit', month: 'long', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', hour12: true
-    });
+    const date = new Date().toLocaleString("en-IN", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "Asia/Kolkata"   // <-- Force IST
+});
 
     const odometerFile = req.files["odometerPhoto"][0];
     const cngFile = req.files["fillingCngPhoto"][0];
@@ -438,11 +449,15 @@ app.post("/After-end", upload.single("file"), async (req, res) => {
     const photoLink = `${baseUrl}/image/${savedImage._id}`;
 
     // ===== Format current date (Indian style) =====
-    const date = new Date().toLocaleString('en-IN', {
-      day: '2-digit', month: 'long', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', hour12: true
-    });
-
+   const date = new Date().toLocaleString("en-IN", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "Asia/Kolkata"   // <-- Force IST
+});
     // ===== Add row to Google Sheet =====
     await addToSheet2(reading, photoLink, username, vehicleNumber, date);
 
